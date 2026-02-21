@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_student_dashboard"
+        android:icon="@drawable/ic_baseline_bar_chart_24"
+        android:title="Tổng quan" />
+    <item
+        android:id="@+id/nav_student_qr_scan"
+        android:icon="@drawable/ic_baseline_qr_code_scanner_24"
+        android:title="@string/nav_student_qr_scan" />
+    <item
+        android:id="@+id/nav_student_history"
+        android:icon="@drawable/ic_baseline_history_24"
+        android:title="@string/nav_student_history" />
+</menu>

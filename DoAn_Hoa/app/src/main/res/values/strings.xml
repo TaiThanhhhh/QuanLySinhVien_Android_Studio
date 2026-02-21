@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">QuanLySinhVien</string>
+    <string name="app_logo">App Logo</string>
+    <string name="student_icon_description">Student icon</string>
+    <string name="class_icon_description">Class icon</string>
+    <string name="qr_code_image_description">QR Code Image</string>
+    <string name="qr_scan_instruction">Di chuyển camera đến QR để quét</string>
+    <string name="opening_camera">Đang mở camera...</string>
+    <string name="status_camera_error">Không thể khởi tạo camera</string>
+    <string name="qr_countdown_text">Mã QR sẽ hết hạn trong: %s</string>
+    <string name="search_class_or_subject_hint">Tìm lớp hoặc môn</string>
+    <string name="hint_student_name">Họ tên</string>
+    <string name="btn_save">Lưu</string>
+    <string name="student_welcome_message">Welcome, %s!</string>
+    <string name="student_title">Sinh viên</string>
+    <string name="class_detail_name">Tên lớp học</string>
+    <string name="class_detail_subject">Môn học</string>
+    <string name="class_detail_status">Trạng thái</string>
+    <string name="class_detail_start_attendance">Bắt đầu Điểm danh</string>
+    <string name="create_class_title">Tạo Lớp học Mới</string>
+    <string name="edit_class_title">Chỉnh sửa lớp học</string>
+    <string name="edit_class_title_format">Chỉnh sửa lớp %1$s - %2$s</string>
+    <string name="btn_update_class">Cập nhật</string>
+    <string name="student_home_welcome">Chào mừng bạn đến với hệ thống điểm danh</string>
+    <string name="student_home_enroll_face">Đăng ký / Cập nhật Khuôn mặt</string>
+    <string name="student_home_welcome_image">Welcome Image</string>
+    <string name="delete_student_from_class_description">Xóa sinh viên khỏi lớp</string>
+    <string name="selected_student_count">Đã chọn: %d/8</string>
+    <string name="search_student_hint">Tìm kiếm sinh viên...</string>
+    <string name="reset_password_description">Reset Mật khẩu</string>
+    <string name="more_options">More options</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <!-- Admin App Strings -->
+    <string name="nav_admin_dashboard">Tổng quan</string>
+    <string name="nav_create_class">Tạo lớp</string>
+    <string name="nav_list_classes">Danh sách Lớp học</string>
+    <string name="nav_students">Quản lý Sinh viên</string>
+    <string name="nav_attendance">Quản lý điểm danh</string>
+    <string name="nav_reports">Thống kê và Báo cáo</string>
+    <string name="hint_class_name">Tên lớp</string>
+    <string name="hint_subject">Môn học</string>
+    <string name="hint_teacher">Giảng viên phụ trách</string>
+    <string name="hint_semester">Học kỳ - năm học</string>
+    <string name="hint_room">Phòng học</string>
+    <string name="hint_start_date">Ngày bắt đầu</string>
+    <string name="hint_end_date">Ngày kết thúc</string>
+    <string name="btn_create_class">Tạo lớp học</string>
+    <string name="btn_add_student">Thêm sinh viên</string>
+    <string name="title_student_list">Danh sách sinh viên</string>
+    <string name="title_attendance_ratio">Tỷ lệ Có mặt / Vắng mặt</string>
+    <string name="title_attendance_timeline">Số sinh viên điểm danh theo thời gian</string>
+    <string name="btn_export_pdf">Xuất PDF</string>
+    <string name="btn_edit">Sửa</string>
+    <string name="btn_delete">Xóa</string>
+    <string name="action_delete">Xóa</string>
+    <string name="btn_reset_device">Reset Thiết bị</string>
+    <string name="btn_reset_password">Reset Mật khẩu</string>
+    <string name="hint_search_student_by_name_or_id">Tìm theo tên hoặc MSSV</string>
+    <string name="hint_search_student">Tìm sinh viên theo MSSV</string>
+    <string name="hint_search_class">Tìm kiếm lớp học...</string>
+    <string name="hint_student_id">Mã số sinh viên (10 chữ số)</string>
+    <string name="btn_back">Quay lại</string>
+    <string name="btn_update">Cập nhật</string>
+    <string name="desc_add_new_student">Thêm sinh viên mới</string>
+    <string name="desc_delete_student">Xóa sinh viên</string>
+    <string name="desc_edit_student">Sửa thông tin sinh viên</string>
+    <string name="title_edit_student">Chỉnh sửa thông tin sinh viên</string>
+    <string name="title_create_student">Tạo sinh viên mới</string>
+    <string name="error_empty_fields">Vui lòng nhập đầy đủ thông tin</string>
+    <string name="error_invalid_mssv_length">MSSV phải có đúng 10 chữ số</string>
+    <string name="success_update_student">Cập nhật thành công</string>
+    <string name="error_update_student">Cập nhật thất bại</string>
+    <string name="error_mssv_exists">MSSV này đã tồn tại</string>
+    <string name="success_create_student">Tạo sinh viên thành công</string>
+    <string name="error_create_student">Tạo sinh viên thất bại</string>
+    <string name="confirm_delete_student_title">Xác nhận xóa</string>
+    <string name="confirm_delete_student_message">Bạn có chắc chắn muốn xóa sinh viên %s? Thao tác này không thể hoàn tác.</string>
+    <string name="class_status_ongoing">Đang diễn ra</string>
+    <string name="class_status_upcoming">Sắp diễn ra</string>
+    <string name="class_status_finished">Đã kết thúc</string>
+    <string name="class_status_locked">Bị khóa</string>
+    <string name="nav_change_password">Đổi mật khẩu</string>
+    <string name="title_account">Tài khoản</string>
+    <string name="change_password_subtitle">Đây là lần đăng nhập đầu tiên của bạn, vui lòng tạo mật khẩu mới.</string>
+    <string name="error_password_empty">Mật khẩu không được để trống</string>
+    <string name="error_confirm_password_empty">Vui lòng xác nhận mật khẩu</string>
+    <string name="error_password_mismatch">Mật khẩu xác nhận không khớp</string>
+    <string name="error_change_password">Lỗi khi đổi mật khẩu</string>
+
+    <!-- Login Screen -->
+    <string name="login_title">Đăng nhập</string>
+    <string name="login_welcome">Quản Lý Sinh Viên</string>
+    <string name="login_username_hint">Tên đăng nhập / MSSV</string>
+    <string name="login_password_hint">Mật khẩu</string>
+    <string name="login_button">Đăng nhập</string>
+    <string name="login_error_empty_username">Tên đăng nhập không được để trống</string>
+    <string name="login_error_empty_password">Mật khẩu không được để trống</string>
+    <string name="login_error_invalid_credentials">Tên đăng nhập hoặc mật khẩu không đúng</string>
+
+
+    <!-- Student App Strings -->
+    <string name="nav_student_qr_scan">Điểm danh (QR)</string>
+    <string name="nav_student_history">Lịch sử điểm danh</string>
+    <string name="status_finding_face">Đang tìm kiếm khuôn mặt...</string>
+    <string name="status_verification_failed">Xác thực không thành công.</string>
+    <string name="btn_retry">Thử lại</string>
+    <string name="btn_cancel">Hủy</string>
+    <string name="attendance_success">Điểm danh thành công! Trạng thái: %s</string>
+    <string name="attendance_failed">Lỗi: Không thể ghi nhận điểm danh</string>
+    <string name="attendance_canceled">Đã hủy điểm danh</string>
+    <string name="permission_needed_camera">Cần cấp quyền camera để xác thực</string>
+    <string name="no_face_enrolled">Bạn chưa đăng ký khuôn mặt. Vui lòng đăng ký trước.</string>
+    <string name="status_on_time">Đúng giờ</string>
+    <string name="status_late">Đi muộn</string>
+    <string name="status_absent">Vắng</string>
+
+    <!-- Common App Strings -->
+    <string name="nav_logout">Đăng xuất</string>
+
+    <string name="btn_add">Thêm</string>
+    <string name="btn_create">Tạo</string>
+    <string name="btn_scan">Quét QR điểm danh</string>
+
+    <string-array name="attendance_statuses">
+        <item>ON_TIME</item>
+        <item>LATE</item>
+        <item>ABSENT</item>
+        <item>EXCUSED</item>
+    </string-array>
+
+    <string name="enrollment_hold_still">Giữ yên, nhìn thẳng, mắt mở, không cười</string>
+    <string name="enrollment_collecting">Đang thu mẫu %1$d/%2$d</string>
+</resources>

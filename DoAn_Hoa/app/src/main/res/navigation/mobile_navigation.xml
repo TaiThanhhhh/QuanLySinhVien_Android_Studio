@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@id/login_fragment">
+
+    <fragment
+        android:id="@+id/login_fragment"
+        android:name="com.example.quanlysinhvien.ui.auth.LoginFragment"
+        android:label="Login"
+        tools:layout="@layout/fragment_login">
+        <action
+            android:id="@+id/action_login_to_admin_navigation"
+            app:destination="@id/admin_navigation"
+            app:popUpTo="@id/mobile_navigation"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_login_to_student_navigation"
+            app:destination="@id/student_navigation"
+            app:popUpTo="@id/mobile_navigation"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_login_to_changePassword"
+            app:destination="@id/change_password_fragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/change_password_fragment"
+        android:name="com.example.quanlysinhvien.ui.auth.ChangePasswordFragment"
+        android:label="Change Password"
+        tools:layout="@layout/fragment_change_password" />
+
+    <include app:graph="@navigation/admin_navigation" />
+    <include app:graph="@navigation/student_navigation" />
+
+</navigation>

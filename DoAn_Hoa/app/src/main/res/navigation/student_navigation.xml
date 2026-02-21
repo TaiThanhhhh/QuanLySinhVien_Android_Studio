@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/student_navigation"
+    app:startDestination="@+id/nav_student_dashboard">
+
+    <fragment
+        android:id="@+id/nav_student_dashboard"
+        android:name="com.example.quanlysinhvien.ui.student.dashboard.StudentDashboardFragment"
+        android:label="Tổng quan"
+        tools:layout="@layout/fragment_student_dashboard">
+        <action
+            android:id="@+id/action_student_dashboard_to_scan_qr"
+            app:destination="@id/nav_student_qr_scan" />
+        <action
+            android:id="@+id/action_student_dashboard_to_history"
+            app:destination="@id/nav_student_history" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_student_home"
+        android:name="com.example.quanlysinhvien.ui.student.home.StudentHomeFragment"
+        android:label="Trang chủ"
+        tools:layout="@layout/fragment_student_home" >
+        <action
+            android:id="@+id/action_home_to_enroll"
+            app:destination="@id/nav_face_enrollment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_face_enrollment"
+        android:name="com.example.quanlysinhvien.ui.student.enrollment.FaceEnrollmentFragment"
+        android:label="Đăng ký khuôn mặt" />
+
+    <fragment
+        android:id="@+id/nav_student_qr_scan"
+        android:name="com.example.quanlysinhvien.ui.student.attendance.ScanQrFragment"
+        android:label="@string/nav_student_qr_scan"
+        tools:layout="@layout/fragment_scan_qr" >
+        <action
+            android:id="@+id/action_scan_to_face"
+            app:destination="@id/nav_face_verification"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_face_verification"
+        android:name="com.example.quanlysinhvien.ui.student.attendance.FaceVerificationFragment"
+        android:label="Xác thực khuôn mặt" >
+        <argument
+            android:name="session_id"
+            app:argType="long" />
+        <argument
+            android:name="start_time"
+            app:argType="long" />
+        <argument
+            android:name="latitude"
+            app:argType="float" />
+        <argument
+            android:name="longitude"
+            app:argType="float" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_student_history"
+        android:name="com.example.quanlysinhvien.ui.student.history.HistoryFragment"
+        android:label="@string/nav_student_history"
+        tools:layout="@layout/fragment_history" >
+        <action
+            android:id="@+id/action_history_to_detail"
+            app:destination="@id/nav_attendance_detail" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_attendance_detail"
+        android:name="com.example.quanlysinhvien.ui.student.history.AttendanceDetailFragment"
+        android:label="Chi tiết điểm danh" >
+        <argument
+            android:name="class_title"
+            app:argType="string" />
+        <argument
+            android:name="timestamp"
+            app:argType="long" />
+        <argument
+            android:name="status"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_student_change_password"
+        android:name="com.example.quanlysinhvien.ui.student.account.StudentChangePasswordFragment"
+        android:label="@string/nav_change_password"
+        tools:layout="@layout/fragment_student_change_password" />
+
+</navigation>

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/admin_navigation"
+    app:startDestination="@+id/nav_dashboard">
+
+    <fragment
+        android:id="@+id/nav_dashboard"
+        android:name="com.example.quanlysinhvien.ui.admin.dashboard.AdminDashboardFragment"
+        android:label="Tổng quan"
+        tools:layout="@layout/fragment_admin_dashboard" />
+
+    <!-- Class Management Flow -->
+    <navigation
+        android:id="@+id/nav_class_management"
+        app:startDestination="@id/nav_list_classes">
+        <fragment
+            android:id="@+id/nav_list_classes"
+            android:name="com.example.quanlysinhvien.ui.admin.classlist.ClassListFragment"
+            android:label="@string/nav_list_classes"
+            tools:layout="@layout/fragment_class_list">
+            <action
+                android:id="@+id/action_list_to_detail"
+                app:destination="@id/nav_class_detail" />
+            <action
+                android:id="@+id/action_list_to_create"
+                app:destination="@id/nav_create_class" />
+        </fragment>
+        <fragment
+            android:id="@+id/nav_create_class"
+            android:name="com.example.quanlysinhvien.ui.admin.classmanagement.CreateClassFragment"
+            android:label="@string/nav_create_class"
+            tools:layout="@layout/fragment_create_class">
+            <argument
+                android:name="class_id"
+                android:defaultValue="-1L"
+                app:argType="long" />
+            <action
+                android:id="@+id/action_create_to_add_student"
+                app:destination="@id/nav_add_student_to_class" />
+        </fragment>
+        <fragment
+            android:id="@+id/nav_class_detail"
+            android:name="com.example.quanlysinhvien.ui.admin.classlist.ClassDetailFragment"
+            android:label="Chi tiết lớp học"
+            tools:layout="@layout/fragment_class_detail">
+            <argument
+                android:name="class_id"
+                app:argType="long" />
+            <action
+                android:id="@+id/action_detail_to_manageAttendance"
+                app:destination="@id/nav_attendance_management" />
+            <action
+                android:id="@+id/action_detail_to_add_student"
+                app:destination="@id/nav_add_student_to_class"/>
+        </fragment>
+        <fragment
+            android:id="@+id/nav_add_student_to_class"
+            android:name="com.example.quanlysinhvien.ui.admin.classmanagement.AddEditStudentFragment"
+            android:label="Thêm sinh viên vào lớp"
+            tools:layout="@layout/fragment_add_edit_student" />
+    </navigation>
+
+    <!-- Student Management Flow -->
+    <navigation android:id="@+id/nav_student_management"
+        app:startDestination="@id/nav_student_list">
+        <fragment
+            android:id="@+id/nav_student_list"
+            android:name="com.example.quanlysinhvien.ui.admin.studentmanagement.StudentManagementFragment"
+            android:label="@string/nav_students"
+            tools:layout="@layout/fragment_student_management">
+            <action
+                android:id="@+id/action_student_list_to_create"
+                app:destination="@id/nav_create_edit_student" />
+        </fragment>
+        <fragment
+            android:id="@+id/nav_create_edit_student"
+            android:name="com.example.quanlysinhvien.ui.admin.studentmanagement.CreateEditStudentFragment"
+            android:label="Tài khoản Sinh viên">
+            <argument
+                android:name="student_id"
+                android:defaultValue="-1L"
+                app:argType="long" />
+        </fragment>
+    </navigation>
+
+    <!-- Attendance Management -->
+    <fragment
+        android:id="@+id/nav_attendance_management"
+        android:name="com.example.quanlysinhvien.ui.admin.attendance.AttendanceManagementFragment"
+        android:label="Quản lý Điểm danh">
+        <argument
+            android:name="class_id"
+            app:argType="long" />
+    </fragment>
+
+    <!-- Reports -->
+    <fragment
+        android:id="@+id/nav_reports"
+        android:name="com.example.quanlysinhvien.ui.admin.statistics.StatisticsFragment"
+        android:label="@string/nav_reports"
+        tools:layout="@layout/fragment_statistics" />
+
+    <!-- Account -->
+    <fragment
+        android:id="@+id/nav_account"
+        android:name="com.example.quanlysinhvien.ui.admin.account.AdminAccountFragment"
+        android:label="Tài khoản"
+        tools:layout="@layout/fragment_admin_account" >
+        <action
+            android:id="@+id/action_account_to_change_password"
+            app:destination="@id/nav_change_password" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_change_password"
+        android:name="com.example.quanlysinhvien.ui.auth.ChangePasswordFragment"
+        android:label="Đổi mật khẩu"
+        tools:layout="@layout/fragment_change_password" />
+
+</navigation>

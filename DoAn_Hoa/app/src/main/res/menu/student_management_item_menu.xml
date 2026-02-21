@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_edit_student"
+        android:title="@string/btn_edit" />
+    <item
+        android:id="@+id/action_delete_student"
+        android:title="@string/btn_delete" />
+    <item
+        android:id="@+id/action_reset_device"
+        android:title="@string/btn_reset_device" />
+    <item
+        android:id="@+id/action_reset_password"
+        android:title="@string/btn_reset_password" />
+</menu>
