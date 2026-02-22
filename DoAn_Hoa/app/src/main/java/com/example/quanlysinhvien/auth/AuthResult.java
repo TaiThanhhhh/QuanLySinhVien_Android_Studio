@@ -7,13 +7,19 @@ public class AuthResult {
 
     private final Status status;
     private final User user;
+    private final String token;
 
-    public AuthResult(Status status, User user) {
+    public AuthResult(Status status, User user, String token) {
         this.status = status;
         this.user = user;
+        this.token = token;
+    }
+
+    public AuthResult(Status status, User user) {
+        this(status, user, null);
     }
 
     public Status getStatus() { return status; }
     public User getUser() { return user; }
+    public String getToken() { return token; }
 }
-

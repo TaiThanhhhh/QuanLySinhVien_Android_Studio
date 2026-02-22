@@ -70,6 +70,12 @@ public class ClassDetailFragment extends Fragment {
             bundle.putLong("class_id", classId);
             NavHostFragment.findNavController(this).navigate(R.id.action_detail_to_manageAttendance, bundle);
         });
+
+        binding.btnGenerateQr.setOnClickListener(v -> {
+            Bundle bundle = new Bundle();
+            bundle.putLong("class_id", classId);
+            NavHostFragment.findNavController(this).navigate(R.id.action_detail_to_generate_qr, bundle);
+        });
     }
 
     private void loadClassDetails() {

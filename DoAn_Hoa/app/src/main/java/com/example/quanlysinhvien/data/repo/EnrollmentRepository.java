@@ -24,9 +24,9 @@ public class EnrollmentRepository {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         try (Cursor cursor = db.query(
                 "class_students",
-                new String[]{"class_id"},
+                new String[] { "class_id" },
                 "class_id = ? AND student_id = ?",
-                new String[]{String.valueOf(classId), String.valueOf(studentId)},
+                new String[] { String.valueOf(classId), String.valueOf(studentId) },
                 null, null, null, "1")) {
             return cursor.getCount() > 0;
         }
@@ -39,14 +39,17 @@ public class EnrollmentRepository {
         cv.put("student_id", studentId);
         cv.put("added_at", System.currentTimeMillis());
         long id = db.insertWithOnConflict("class_students", null, cv, SQLiteDatabase.CONFLICT_IGNORE);
-        if (id != -1) auditRepo.log("ENROLL", null, "class="+classId, "student="+studentId);
+        if (id != -1)
+            auditRepo.log("ENROLL", null, "class=" + classId, "student=" + studentId);
         return id != -1;
     }
 
     public boolean removeStudent(long classId, long studentId) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        int rows = db.delete("class_students", "class_id = ? AND student_id = ?", new String[]{String.valueOf(classId), String.valueOf(studentId)});
-        if (rows > 0) auditRepo.log("UNENROLL", null, "class="+classId, "student="+studentId);
+        int rows = db.delete("class_students", "class_id = ? AND student_id = ?",
+                new String[] { String.valueOf(classId), String.valueOf(studentId) });
+        if (rows > 0)
+            auditRepo.log("UNENROLL", null, "class=" + classId, "student=" + studentId);
         return rows > 0;
     }
 
@@ -55,7 +58,7 @@ public class EnrollmentRepository {
         db.beginTransaction();
         try {
             // First, remove all existing students from the class
-            db.delete("class_students", "class_id = ?", new String[]{String.valueOf(classId)});
+            db.delete("class_students", "class_id = ?", new String[] { String.valueOf(classId) });
 
             // Then, add the new list of students
             for (User student : students) {
@@ -74,16 +77,20 @@ public class EnrollmentRepository {
     public List<User> getStudentsInClass(long classId) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         String sql = "SELECT u.* FROM users u JOIN class_students cs ON u.id = cs.student_id WHERE cs.class_id = ? ORDER BY u.mssv";
-        Cursor c = db.rawQuery(sql, new String[]{String.valueOf(classId)});
+        Cursor c = db.rawQuery(sql, new String[] { String.valueOf(classId) });
         List<User> list = new ArrayList<>();
         try {
             while (c.moveToNext()) {
                 User u = new User();
                 u.setId(c.getLong(c.getColumnIndexOrThrow("id")));
-                int idx = c.getColumnIndex("mssv"); if (idx != -1) u.setMssv(c.getString(idx));
+                int idx = c.getColumnIndex("mssv");
+                if (idx != -1)
+                    u.setMssv(c.getString(idx));
                 u.setName(c.getString(c.getColumnIndexOrThrow("name")));
                 u.setRole(c.getString(c.getColumnIndexOrThrow("role")));
-                int didx = c.getColumnIndex("device_id"); if (didx != -1) u.setDeviceId(c.getString(didx));
+                int didx = c.getColumnIndex("device_id");
+                if (didx != -1)
+                    u.setDeviceId(c.getString(didx));
                 u.setCreatedAt(c.getLong(c.getColumnIndexOrThrow("created_at")));
                 list.add(u);
             }

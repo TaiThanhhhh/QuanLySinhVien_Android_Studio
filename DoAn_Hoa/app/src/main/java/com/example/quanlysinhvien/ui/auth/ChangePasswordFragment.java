@@ -21,6 +21,7 @@ import com.example.quanlysinhvien.data.model.User;
 import com.example.quanlysinhvien.data.repo.UserRepository;
 import com.example.quanlysinhvien.databinding.FragmentChangePasswordBinding;
 
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -90,17 +91,27 @@ public class ChangePasswordFragment extends Fragment {
 
         executor.execute(() -> {
             boolean success = userRepository.changePassword(userId, newPass);
+            String newToken = null;
+            if (success) {
+                // Invalidate old token by creating a new one
+                newToken = UUID.randomUUID().toString();
+                userRepository.updateAuthToken(userId, newToken);
+            }
             User user = success ? userRepository.getUserById(userId) : null;
 
+            final String finalToken = newToken;
             handler.post(() -> {
                 showLoading(false);
                 if (success && user != null) {
-                    // Save session and go to main
+                    // Save new session and go to main
                     if (getContext() == null) return;
                     SessionManager session = new SessionManager(requireContext());
-                    session.saveSession(user.getId(), user.getRole());
+                    session.saveSession(user.getId(), user.getRole(), finalToken);
+
+                    Toast.makeText(getContext(), "Đổi mật khẩu thành công!", Toast.LENGTH_SHORT).show();
+
                     Intent it = new Intent(getActivity(), MainActivity.class);
-                    it.putExtra("userRole", user.getRole());
+                    it.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(it);
                     if (getActivity() != null) {
                         getActivity().finish();

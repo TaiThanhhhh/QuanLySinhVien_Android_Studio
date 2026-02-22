@@ -48,7 +48,7 @@ public class AdminDashboardFragment extends Fragment {
 
         // Quick Actions - Updated to navigate to nested graphs
         view.findViewById(R.id.card_action_create_class).setOnClickListener(
-                v -> NavHostFragment.findNavController(this).navigate(R.id.nav_class_management));
+                v -> NavHostFragment.findNavController(this).navigate(R.id.action_dashboard_to_create_class));
 
         view.findViewById(R.id.card_action_students).setOnClickListener(
                 v -> NavHostFragment.findNavController(this).navigate(R.id.nav_student_management));

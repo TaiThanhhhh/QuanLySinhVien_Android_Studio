@@ -1,11 +1,15 @@
 package com.example.quanlysinhvien.ui.admin.classmanagement;
 
+import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.quanlysinhvien.R;
 import com.example.quanlysinhvien.data.model.User;
 import com.example.quanlysinhvien.databinding.ItemStudentSelectedGridBinding;
 
@@ -30,7 +34,8 @@ public class SelectedStudentAdapter extends ListAdapter<User, SelectedStudentAda
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        ItemStudentSelectedGridBinding binding = ItemStudentSelectedGridBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
+        ItemStudentSelectedGridBinding binding = ItemStudentSelectedGridBinding
+                .inflate(LayoutInflater.from(parent.getContext()), parent, false);
         return new ViewHolder(binding);
     }
 
@@ -57,6 +62,19 @@ public class SelectedStudentAdapter extends ListAdapter<User, SelectedStudentAda
         void bind(User student) {
             binding.tvStudentName.setText(student.getName());
             binding.tvStudentId.setText(student.getMssv());
+
+            // Unify style with "Selected" state in the picker
+            int primaryColor = ContextCompat.getColor(itemView.getContext(), R.color.primary);
+            int whiteColor = ContextCompat.getColor(itemView.getContext(), android.R.color.white);
+
+            // Always show as "Selected" state (Primary background, white text/icons)
+            binding.getRoot().setCardBackgroundColor(primaryColor);
+            binding.tvStudentName.setTextColor(whiteColor);
+            binding.tvStudentId.setTextColor(whiteColor);
+
+            // Icon tints
+            binding.ivStudentAvatar.setImageTintList(ColorStateList.valueOf(whiteColor));
+            binding.btnRemoveStudent.setImageTintList(ColorStateList.valueOf(whiteColor));
         }
     }
 

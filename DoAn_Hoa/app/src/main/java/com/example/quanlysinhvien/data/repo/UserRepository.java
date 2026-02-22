@@ -207,6 +207,14 @@ public class UserRepository {
         return students;
     }
 
+    public boolean updateAuthToken(long userId, String token) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put("token", token);
+        int rows = db.update("users", cv, "id = ?", new String[]{String.valueOf(userId)});
+        return rows > 0;
+    }
+
     private User cursorToUser(Cursor c) {
         User user = new User();
         user.setId(c.getLong(c.getColumnIndexOrThrow("id")));
@@ -222,6 +230,10 @@ public class UserRepository {
         int faceCol = c.getColumnIndex("face_template");
         if (faceCol != -1 && !c.isNull(faceCol)) {
             user.setFaceTemplate(c.getString(faceCol));
+        }
+        int tokenCol = c.getColumnIndex("token");
+        if (tokenCol != -1 && !c.isNull(tokenCol)) {
+            user.setToken(c.getString(tokenCol));
         }
         return user;
     }

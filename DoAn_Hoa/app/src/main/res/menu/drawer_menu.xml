@@ -13,13 +13,13 @@
             android:icon="@drawable/ic_baseline_class_24"
             android:title="@string/nav_list_classes" />
         <item
+            android:id="@+id/nav_menu_attendance"
+            android:icon="@drawable/ic_baseline_rule_24"
+            android:title="@string/nav_attendance" />
+        <item
             android:id="@+id/nav_student_management"
             android:icon="@drawable/ic_baseline_people_24"
             android:title="@string/nav_students" />
-        <item
-            android:id="@+id/nav_attendance"
-            android:icon="@drawable/ic_baseline_rule_24"
-            android:title="@string/nav_attendance" />
         <item
             android:id="@+id/nav_reports"
             android:icon="@drawable/ic_baseline_bar_chart_24"

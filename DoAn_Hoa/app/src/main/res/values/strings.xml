@@ -96,7 +96,7 @@
 
     <!-- Login Screen -->
     <string name="login_title">Đăng nhập</string>
-    <string name="login_welcome">Quản Lý Sinh Viên</string>
+    <string name="login_welcome">Quản Lý Điểm Danh</string>
     <string name="login_username_hint">Tên đăng nhập / MSSV</string>
     <string name="login_password_hint">Mật khẩu</string>
     <string name="login_button">Đăng nhập</string>

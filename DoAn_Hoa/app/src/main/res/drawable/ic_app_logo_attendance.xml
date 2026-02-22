@@ -1,0 +1,76 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="512dp"
+    android:height="512dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <!-- Background Circle with Soft Shadow effect -->
+    <path
+        android:pathData="M256,256m-240,0a240,240 0 1,1 480,0a240,240 0 1,1 -480,0"
+        android:fillColor="#F5F5F5"/>
+
+    <!-- Inner Shield/Card Shape -->
+    <path
+        android:pathData="M120,160 C120,140 140,120 160,120 L352,120 C372,120 392,140 392,160 L392,380 C392,410 372,430 352,430 L160,430 C140,430 120,410 120,380 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="256"
+                android:startY="120"
+                android:endX="256"
+                android:endY="430"
+                android:type="linear">
+                <item android:color="#1E88E5" android:offset="0.0" />
+                <item android:color="#1565C0" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Stylized Checklist / Attendance Icon -->
+    <group android:translateX="186" android:translateY="180">
+        <!-- Lines -->
+        <path
+            android:pathData="M0,20 L140,20"
+            android:strokeWidth="12"
+            android:strokeColor="#FFFFFF"
+            android:strokeLineCap="round"
+            android:alpha="0.4"/>
+        <path
+            android:pathData="M0,60 L140,60"
+            android:strokeWidth="12"
+            android:strokeColor="#FFFFFF"
+            android:strokeLineCap="round"
+            android:alpha="0.4"/>
+        <path
+            android:pathData="M0,100 L90,100"
+            android:strokeWidth="12"
+            android:strokeColor="#FFFFFF"
+            android:strokeLineCap="round"
+            android:alpha="0.4"/>
+
+        <!-- Success Checkmark with Glow -->
+        <path
+            android:pathData="M90,80 L115,105 L165,55"
+            android:strokeWidth="20"
+            android:strokeColor="#00E676"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"/>
+    </group>
+
+    <!-- Student Silhouette Icon (Small Bottom Corner) -->
+    <group android:translateX="140" android:translateY="320" android:scaleX="0.5" android:scaleY="0.5">
+        <path
+            android:pathData="M128,128m-64,0a64,64 0 1,1 128,0a64,64 0 1,1 -128,0"
+            android:fillColor="#E3F2FD"/>
+        <path
+            android:pathData="M128,210 C76,210 32,254 32,310 L224,310 C224,254 180,210 128,210 Z"
+            android:fillColor="#E3F2FD"/>
+    </group>
+
+    <!-- Glossy Overlay -->
+    <path
+        android:pathData="M120,160 L392,160 L120,300 Z"
+        android:fillColor="#FFFFFF"
+        android:alpha="0.1"/>
+
+</vector>

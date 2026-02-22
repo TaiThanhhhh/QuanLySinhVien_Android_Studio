@@ -15,7 +15,7 @@
         android:layout_height="64dp"
         android:contentDescription="@string/nav_header_desc"
         android:padding="@dimen/padding_small"
-        android:src="@drawable/ic_launcher_foreground"
+        android:src="@drawable/ic_student"
         app:tint="@color/on_primary"/>
 
     <TextView

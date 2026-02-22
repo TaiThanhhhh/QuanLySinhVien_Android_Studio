@@ -37,6 +37,8 @@ import com.google.mlkit.vision.face.FaceDetector;
 import com.google.mlkit.vision.face.FaceDetectorOptions;
 import com.google.mlkit.vision.face.FaceLandmark;
 
+import com.example.quanlysinhvien.databinding.FragmentFaceEnrollmentBinding;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -52,11 +54,10 @@ public class FaceEnrollmentFragment extends Fragment {
     private static final String MODEL_ASSET = "mobile_face_embedding.tflite";
     private static final int ENROLL_SAMPLES = 5;
     private static final long SAMPLE_INTERVAL_MS = 700; // time between captures
+    private FragmentFaceEnrollmentBinding binding;
     private UserRepository userRepository;
     private SessionManager sessionManager;
 
-    private PreviewView previewView;
-    private TextView tvStatus;
     private ExecutorService cameraExecutor;
     private final AtomicBoolean isProcessing = new AtomicBoolean(false);
 
@@ -71,8 +72,7 @@ public class FaceEnrollmentFragment extends Fragment {
                 } else {
                     Toast.makeText(getContext(), "Cần cấp quyền camera để đăng ký khuôn mặt", Toast.LENGTH_LONG).show();
                 }
-            }
-    );
+            });
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -84,20 +84,21 @@ public class FaceEnrollmentFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_face_enrollment, container, false);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
+        binding = FragmentFaceEnrollmentBinding.inflate(inflater, container, false);
+        return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        previewView = view.findViewById(R.id.camera_preview_enrollment);
-        tvStatus = view.findViewById(R.id.tv_enrollment_status);
         checkCameraPermission();
     }
 
     private void checkCameraPermission() {
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(requireContext(),
+                Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             startCamera();
         } else {
             requestPermissionLauncher.launch(Manifest.permission.CAMERA);
@@ -105,26 +106,31 @@ public class FaceEnrollmentFragment extends Fragment {
     }
 
     private void startCamera() {
-        // Lazy initialize embedder here to avoid loading TF runtime during fragment creation
+        // Lazy initialize embedder here to avoid loading TF runtime during fragment
+        // creation
         if (embedder == null && FaceUtils.assetExists(requireContext(), MODEL_ASSET)) {
             try {
                 embedder = new FaceEmbedder(requireContext(), MODEL_ASSET, 112, 512);
             } catch (Throwable t) {
-                // If interpreter not available or init fails, keep embedder null and fallback to landmarks-only
+                // If interpreter not available or init fails, keep embedder null and fallback
+                // to landmarks-only
                 embedder = null;
             }
         }
-        ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext());
+        ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider
+                .getInstance(requireContext());
 
         cameraProviderFuture.addListener(() -> {
             try {
                 ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
                 Preview preview = new Preview.Builder().build();
-                preview.setSurfaceProvider(previewView.getSurfaceProvider());
+                preview.setSurfaceProvider(binding.cameraPreviewEnrollment.getSurfaceProvider());
 
-                CameraSelector cameraSelector = new CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_FRONT).build();
+                CameraSelector cameraSelector = new CameraSelector.Builder()
+                        .requireLensFacing(CameraSelector.LENS_FACING_FRONT).build();
 
-                ImageAnalysis imageAnalysis = new ImageAnalysis.Builder().setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build();
+                ImageAnalysis imageAnalysis = new ImageAnalysis.Builder()
+                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build();
 
                 FaceDetectorOptions options = new FaceDetectorOptions.Builder()
                         .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
@@ -148,7 +154,8 @@ public class FaceEnrollmentFragment extends Fragment {
                     }
 
                     @SuppressWarnings("UnsafeOptInUsageError")
-                    InputImage inputImage = InputImage.fromMediaImage(image.getImage(), image.getImageInfo().getRotationDegrees());
+                    InputImage inputImage = InputImage.fromMediaImage(image.getImage(),
+                            image.getImageInfo().getRotationDegrees());
 
                     detector.process(inputImage)
                             .addOnSuccessListener(faces -> {
@@ -164,23 +171,29 @@ public class FaceEnrollmentFragment extends Fragment {
                                         if (embedder != null && embedder.isReady()) {
                                             // collect ENROLL_SAMPLES embeddings
                                             List<float[]> collected = new java.util.ArrayList<>();
-                                            int[] captureCount = {0};
-                                            tvStatus.setText(getString(R.string.enrollment_collecting, captureCount[0], ENROLL_SAMPLES));
+                                            int[] captureCount = { 0 };
+                                            binding.tvEnrollmentStatus
+                                                    .setText(getString(R.string.enrollment_collecting, captureCount[0],
+                                                            ENROLL_SAMPLES));
 
                                             Runnable captureTask = new Runnable() {
                                                 @Override
                                                 public void run() {
-                                                    Bitmap previewBitmap = previewView.getBitmap();
+                                                    Bitmap previewBitmap = binding.cameraPreviewEnrollment.getBitmap();
                                                     if (previewBitmap != null) {
                                                         android.graphics.Rect bbox = face.getBoundingBox();
-                                                        Bitmap faceCrop = FaceUtils.alignCrop(previewBitmap, face.getAllLandmarks(), bbox, true, 25);
+                                                        Bitmap faceCrop = FaceUtils.alignCrop(previewBitmap,
+                                                                face.getAllLandmarks(), bbox, true, 25);
                                                         if (faceCrop != null) {
                                                             float[] emb = embedder.embed(faceCrop);
-                                                            if (emb != null) collected.add(emb);
+                                                            if (emb != null)
+                                                                collected.add(emb);
                                                         }
                                                     }
                                                     captureCount[0]++;
-                                                    mainHandler.post(() -> tvStatus.setText(getString(R.string.enrollment_collecting, captureCount[0], ENROLL_SAMPLES)));
+                                                    mainHandler.post(() -> binding.tvEnrollmentStatus
+                                                            .setText(getString(R.string.enrollment_collecting,
+                                                                    captureCount[0], ENROLL_SAMPLES)));
                                                     if (captureCount[0] < ENROLL_SAMPLES) {
                                                         mainHandler.postDelayed(this, SAMPLE_INTERVAL_MS);
                                                     } else {
@@ -189,22 +202,37 @@ public class FaceEnrollmentFragment extends Fragment {
                                                             int dim = collected.get(0).length;
                                                             float[] avg = new float[dim];
                                                             for (float[] e : collected) {
-                                                                for (int i = 0; i < dim; i++) avg[i] += e[i];
+                                                                for (int i = 0; i < dim; i++)
+                                                                    avg[i] += e[i];
                                                             }
-                                                            for (int i = 0; i < dim; i++) avg[i] /= collected.size();
+                                                            for (int i = 0; i < dim; i++)
+                                                                avg[i] /= collected.size();
                                                             // normalize
-                                                            double sum = 0; for (float v : avg) sum += v*v; double norm = Math.sqrt(sum); if (norm>0) for (int i=0;i<dim;i++) avg[i] /= norm;
-                                                            faceTemplateRef[0] = FaceUtils.packTemplateWithEmbedding(landmarksJson, avg);
+                                                            double sum = 0;
+                                                            for (float v : avg)
+                                                                sum += v * v;
+                                                            double norm = Math.sqrt(sum);
+                                                            if (norm > 0)
+                                                                for (int i = 0; i < dim; i++)
+                                                                    avg[i] /= norm;
+                                                            faceTemplateRef[0] = FaceUtils
+                                                                    .packTemplateWithEmbedding(landmarksJson, avg);
                                                         }
 
-                                                        if (faceTemplateRef[0] == null) faceTemplateRef[0] = landmarksJson;
+                                                        if (faceTemplateRef[0] == null)
+                                                            faceTemplateRef[0] = landmarksJson;
 
                                                         if (faceTemplateRef[0] != null) {
                                                             cameraProvider.unbindAll();
-                                                            userRepository.updateFaceTemplate(sessionManager.getUserId(), faceTemplateRef[0]);
+                                                            userRepository.updateFaceTemplate(
+                                                                    sessionManager.getUserId(), faceTemplateRef[0]);
                                                             requireActivity().runOnUiThread(() -> {
-                                                                Toast.makeText(getContext(), "Đăng ký khuôn mặt thành công!", Toast.LENGTH_LONG).show();
-                                                                NavHostFragment.findNavController(FaceEnrollmentFragment.this).popBackStack();
+                                                                Toast.makeText(getContext(),
+                                                                        "Đăng ký khuôn mặt thành công!",
+                                                                        Toast.LENGTH_LONG).show();
+                                                                NavHostFragment
+                                                                        .findNavController(FaceEnrollmentFragment.this)
+                                                                        .popBackStack();
                                                             });
                                                         }
 
@@ -220,18 +248,24 @@ public class FaceEnrollmentFragment extends Fragment {
                                         }
 
                                         // Fallback: store landmarks-only
-                                        if (faceTemplateRef[0] == null) faceTemplateRef[0] = landmarksJson;
+                                        if (faceTemplateRef[0] == null)
+                                            faceTemplateRef[0] = landmarksJson;
 
                                         if (faceTemplateRef[0] != null) {
                                             cameraProvider.unbindAll();
-                                            userRepository.updateFaceTemplate(sessionManager.getUserId(), faceTemplateRef[0]);
+                                            userRepository.updateFaceTemplate(sessionManager.getUserId(),
+                                                    faceTemplateRef[0]);
                                             requireActivity().runOnUiThread(() -> {
-                                                Toast.makeText(getContext(), "Đăng ký khuôn mặt thành công!", Toast.LENGTH_LONG).show();
-                                                NavHostFragment.findNavController(this).popBackStack();
+                                                Toast.makeText(getContext(), "Đăng ký khuôn mặt thành công!",
+                                                        Toast.LENGTH_LONG).show();
+                                                NavHostFragment.findNavController(FaceEnrollmentFragment.this)
+                                                        .popBackStack();
                                             });
                                         }
                                     } else {
-                                        requireActivity().runOnUiThread(() -> tvStatus.setText(R.string.enrollment_hold_still));
+                                        requireActivity()
+                                                .runOnUiThread(() -> binding.tvEnrollmentStatus
+                                                        .setText(R.string.enrollment_hold_still));
                                     }
                                 }
                                 isProcessing.set(false);
@@ -254,11 +288,13 @@ public class FaceEnrollmentFragment extends Fragment {
 
     private boolean isGoodFaceForEnrollment(Face face) {
         // Check if all necessary landmarks are present
-        if (face.getLandmark(FaceLandmark.LEFT_EYE) == null || face.getLandmark(FaceLandmark.RIGHT_EYE) == null || face.getLandmark(FaceLandmark.NOSE_BASE) == null) {
+        if (face.getLandmark(FaceLandmark.LEFT_EYE) == null || face.getLandmark(FaceLandmark.RIGHT_EYE) == null
+                || face.getLandmark(FaceLandmark.NOSE_BASE) == null) {
             return false;
         }
         // Check head rotation
-        return face.getHeadEulerAngleY() < 10 && face.getHeadEulerAngleY() > -10 && face.getHeadEulerAngleZ() < 10 && face.getHeadEulerAngleZ() > -10;
+        return face.getHeadEulerAngleY() < 10 && face.getHeadEulerAngleY() > -10 && face.getHeadEulerAngleZ() < 10
+                && face.getHeadEulerAngleZ() > -10;
     }
 
     private String landmarksToJson(List<FaceLandmark> landmarks) {
@@ -267,7 +303,8 @@ public class FaceEnrollmentFragment extends Fragment {
             JSONObject json = new JSONObject();
             JSONArray array = new JSONArray();
             for (FaceLandmark landmark : landmarks) {
-                if (landmark == null) continue;
+                if (landmark == null)
+                    continue;
                 JSONObject point = new JSONObject();
                 point.put("type", landmark.getLandmarkType());
                 point.put("x", landmark.getPosition().x);
@@ -279,6 +316,12 @@ public class FaceEnrollmentFragment extends Fragment {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 
     @Override

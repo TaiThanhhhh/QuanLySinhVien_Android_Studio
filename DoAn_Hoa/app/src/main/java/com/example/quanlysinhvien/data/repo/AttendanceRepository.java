@@ -49,7 +49,8 @@ public class AttendanceRepository {
 
     public boolean hasStudentAttended(long sessionId, long studentId) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        try (Cursor cursor = db.query("attendance_records", new String[]{"id"}, "session_id = ? AND student_id = ?", new String[]{String.valueOf(sessionId), String.valueOf(studentId)}, null, null, null, "1")) {
+        try (Cursor cursor = db.query("attendance_records", new String[] { "id" }, "session_id = ? AND student_id = ?",
+                new String[] { String.valueOf(sessionId), String.valueOf(studentId) }, null, null, null, "1")) {
             return cursor.getCount() > 0;
         }
     }
@@ -57,11 +58,18 @@ public class AttendanceRepository {
     public List<AttendanceRecord> getAttendanceHistoryForStudent(long studentId) {
         List<AttendanceRecord> records = new ArrayList<>();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        String query = "SELECT c.title as class_title, a.timestamp, a.status FROM attendance_records a JOIN attendance_sessions s ON a.session_id = s.id JOIN classes c ON s.class_id = c.id WHERE a.student_id = ? ORDER BY a.timestamp DESC";
-        try (Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(studentId)})) {
+        String query = "SELECT c.title as class_title, c.subject, c.teacher_name, a.timestamp, a.status " +
+                "FROM attendance_records a " +
+                "JOIN attendance_sessions s ON a.session_id = s.id " +
+                "JOIN classes c ON s.class_id = c.id " +
+                "WHERE a.student_id = ? " +
+                "ORDER BY a.timestamp DESC";
+        try (Cursor cursor = db.rawQuery(query, new String[] { String.valueOf(studentId) })) {
             while (cursor.moveToNext()) {
                 AttendanceRecord record = new AttendanceRecord();
                 record.setClassTitle(cursor.getString(cursor.getColumnIndexOrThrow("class_title")));
+                record.setSubject(cursor.getString(cursor.getColumnIndexOrThrow("subject")));
+                record.setTeacherName(cursor.getString(cursor.getColumnIndexOrThrow("teacher_name")));
                 record.setTimestamp(cursor.getLong(cursor.getColumnIndexOrThrow("timestamp")));
                 record.setStatus(cursor.getString(cursor.getColumnIndexOrThrow("status")));
                 records.add(record);
@@ -74,7 +82,7 @@ public class AttendanceRepository {
         List<AttendanceStatus> statuses = new ArrayList<>();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         String query = "SELECT u.id, u.name, u.mssv, ar.status, ar.timestamp FROM class_students cs JOIN users u ON cs.student_id = u.id LEFT JOIN attendance_records ar ON u.id = ar.student_id AND ar.session_id = ? WHERE cs.class_id = ? ORDER BY u.name";
-        try (Cursor c = db.rawQuery(query, new String[]{String.valueOf(sessionId), String.valueOf(classId)})) {
+        try (Cursor c = db.rawQuery(query, new String[] { String.valueOf(sessionId), String.valueOf(classId) })) {
             while (c.moveToNext()) {
                 User student = new User();
                 student.setId(c.getLong(c.getColumnIndexOrThrow("id")));
@@ -110,9 +118,10 @@ public class AttendanceRepository {
         List<StatusCount> counts = new ArrayList<>();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         String query = "SELECT status, COUNT(*) as count FROM attendance_records WHERE session_id = ? GROUP BY status";
-        try (Cursor c = db.rawQuery(query, new String[]{String.valueOf(sessionId)})) {
+        try (Cursor c = db.rawQuery(query, new String[] { String.valueOf(sessionId) })) {
             while (c.moveToNext()) {
-                counts.add(new StatusCount(c.getString(c.getColumnIndexOrThrow("status")), c.getInt(c.getColumnIndexOrThrow("count"))));
+                counts.add(new StatusCount(c.getString(c.getColumnIndexOrThrow("status")),
+                        c.getInt(c.getColumnIndexOrThrow("count"))));
             }
         }
         return counts;
@@ -122,9 +131,10 @@ public class AttendanceRepository {
         List<TimestampCount> counts = new ArrayList<>();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         String query = "SELECT timestamp, COUNT(*) as count FROM attendance_records WHERE session_id = ? GROUP BY strftime('%Y-%m-%d %H:%M', timestamp / 1000, 'unixepoch') ORDER BY timestamp ASC";
-        try (Cursor c = db.rawQuery(query, new String[]{String.valueOf(sessionId)})) {
+        try (Cursor c = db.rawQuery(query, new String[] { String.valueOf(sessionId) })) {
             while (c.moveToNext()) {
-                counts.add(new TimestampCount(c.getLong(c.getColumnIndexOrThrow("timestamp")), c.getInt(c.getColumnIndexOrThrow("count"))));
+                counts.add(new TimestampCount(c.getLong(c.getColumnIndexOrThrow("timestamp")),
+                        c.getInt(c.getColumnIndexOrThrow("count"))));
             }
         }
         return counts;
@@ -134,7 +144,7 @@ public class AttendanceRepository {
         List<AttendanceRecord> records = new ArrayList<>();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         String query = "SELECT u.name, u.mssv, ar.status FROM class_students cs JOIN users u ON cs.student_id = u.id LEFT JOIN attendance_records ar ON u.id = ar.student_id AND ar.session_id = ? WHERE cs.class_id = ?";
-        try (Cursor c = db.rawQuery(query, new String[]{String.valueOf(sessionId), String.valueOf(classId)})) {
+        try (Cursor c = db.rawQuery(query, new String[] { String.valueOf(sessionId), String.valueOf(classId) })) {
             while (c.moveToNext()) {
                 AttendanceRecord record = new AttendanceRecord();
                 record.setClassTitle(c.getString(c.getColumnIndexOrThrow("name"))); // Not right, but for pdf
@@ -144,5 +154,52 @@ public class AttendanceRepository {
             }
         }
         return records;
+    }
+
+    public List<StatusCount> getStudentAttendanceStats(long studentId) {
+        List<StatusCount> stats = new ArrayList<>();
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+        // 1. Get explicit counts from attendance_records (PRESENT, LATE, EXCUSED, etc.)
+        String query = "SELECT status, COUNT(*) as count FROM attendance_records WHERE student_id = ? GROUP BY status";
+        int totalRecorded = 0;
+        try (Cursor c = db.rawQuery(query, new String[] { String.valueOf(studentId) })) {
+            while (c.moveToNext()) {
+                String status = c.getString(c.getColumnIndexOrThrow("status"));
+                int count = c.getInt(c.getColumnIndexOrThrow("count"));
+                stats.add(new StatusCount(status, count));
+                totalRecorded += count;
+            }
+        }
+
+        // 2. Calculate unrecorded absences
+        // Total sessions for ALL classes this student is enrolled in
+        String totalSessionsQuery = "SELECT COUNT(*) FROM attendance_sessions s " +
+                "JOIN class_students cs ON s.class_id = cs.class_id " +
+                "WHERE cs.student_id = ?";
+        int totalSessions = 0;
+        try (Cursor c = db.rawQuery(totalSessionsQuery, new String[] { String.valueOf(studentId) })) {
+            if (c.moveToFirst()) {
+                totalSessions = c.getInt(0);
+            }
+        }
+
+        int unrecordedAbsences = totalSessions - totalRecorded;
+        if (unrecordedAbsences > 0) {
+            // Find if "ABSENT" already exists in stats
+            boolean found = false;
+            for (int i = 0; i < stats.size(); i++) {
+                if ("ABSENT".equals(stats.get(i).getStatus())) {
+                    stats.set(i, new StatusCount("ABSENT", stats.get(i).getCount() + unrecordedAbsences));
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                stats.add(new StatusCount("ABSENT", unrecordedAbsences));
+            }
+        }
+
+        return stats;
     }
 }

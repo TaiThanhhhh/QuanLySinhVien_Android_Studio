@@ -65,6 +65,9 @@ public class StatisticsFragment extends Fragment {
     private PieChart pieChart;
     private LineChart lineChart;
     private AutoCompleteTextView classSpinner;
+    private android.widget.TextView tvStatSessions;
+    private android.widget.TextView tvStatEnrolled;
+    private android.widget.TextView tvStatRate;
     private AttendanceRepository attendanceRepository;
     private AttendanceSessionRepository sessionRepository;
     private ClassRepository classRepository;
@@ -79,8 +82,7 @@ public class StatisticsFragment extends Fragment {
                 } else {
                     Toast.makeText(getContext(), "Cần cấp quyền ghi file để xuất báo cáo", Toast.LENGTH_LONG).show();
                 }
-            }
-    );
+            });
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -93,7 +95,8 @@ public class StatisticsFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_statistics, container, false);
     }
 
@@ -104,6 +107,9 @@ public class StatisticsFragment extends Fragment {
         pieChart = view.findViewById(R.id.pie_chart_attendance);
         lineChart = view.findViewById(R.id.line_chart_timeline);
         classSpinner = view.findViewById(R.id.actv_class_filter);
+        tvStatSessions = view.findViewById(R.id.tv_stat_sessions);
+        tvStatEnrolled = view.findViewById(R.id.tv_stat_enrolled);
+        tvStatRate = view.findViewById(R.id.tv_stat_rate);
         Button btnExport = view.findViewById(R.id.btn_export_pdf);
         btnExport.setOnClickListener(v -> checkPermissionAndExport());
 
@@ -118,7 +124,8 @@ public class StatisticsFragment extends Fragment {
             return;
         }
 
-        ArrayAdapter<ClassModel> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_dropdown_item_1line, classList);
+        ArrayAdapter<ClassModel> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_dropdown_item_1line,
+                classList);
         classSpinner.setAdapter(adapter);
 
         classSpinner.setOnItemClickListener((parent, view, position, id) -> {
@@ -145,13 +152,34 @@ public class StatisticsFragment extends Fragment {
     }
 
     private void loadChartData(long classId) {
+        // --- Stat cards ---
+        int sessionCount = sessionRepository.getSessionsForClass(classId).size();
+        int enrolledCount = enrollmentRepository.getStudentsInClass(classId).size();
+        if (tvStatSessions != null)
+            tvStatSessions.setText(String.valueOf(sessionCount));
+        if (tvStatEnrolled != null)
+            tvStatEnrolled.setText(String.valueOf(enrolledCount));
+
         AttendanceSession latestSession = sessionRepository.getLatestSessionForClass(classId);
         if (latestSession != null) {
             loadPieChartData(latestSession.getId(), classId);
             loadLineChartData(latestSession.getId());
+            // Calculate attendance rate from latest session
+            if (tvStatRate != null && enrolledCount > 0) {
+                List<StatusCount> counts = attendanceRepository.getAttendanceStatusCounts(latestSession.getId());
+                int present = 0;
+                for (StatusCount sc : counts)
+                    present += sc.getCount();
+                int rate = (int) Math.round((present * 100.0) / enrolledCount);
+                tvStatRate.setText(rate + "%");
+            } else if (tvStatRate != null) {
+                tvStatRate.setText("—");
+            }
         } else {
             pieChart.clear();
             lineChart.clear();
+            if (tvStatRate != null)
+                tvStatRate.setText("—");
             Toast.makeText(getContext(), "Lớp học chưa có dữ liệu điểm danh", Toast.LENGTH_SHORT).show();
         }
     }
@@ -213,7 +241,8 @@ public class StatisticsFragment extends Fragment {
             Toast.makeText(getContext(), "Vui lòng chọn một lớp học", Toast.LENGTH_SHORT).show();
             return;
         }
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(requireContext(),
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
             exportPdf();
         } else {
             requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE);
@@ -221,15 +250,14 @@ public class StatisticsFragment extends Fragment {
     }
 
     private void exportPdf() {
-        AttendanceSession latestSession = sessionRepository.getLatestSessionForClass(selectedClass.getId());
-        if (latestSession == null) {
+        List<AttendanceSession> sessions = sessionRepository.getSessionsForClass(selectedClass.getId());
+        if (sessions == null || sessions.isEmpty()) {
             Toast.makeText(getContext(), "Lớp học này chưa có dữ liệu điểm danh", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        List<AttendanceStatus> attendanceList = attendanceRepository.getAttendanceStatusForSession(latestSession.getId(), selectedClass.getId());
-
-        String fileName = "BaoCaoDiemDanh_" + selectedClass.getTitle().replace(" ", "_") + "_" + System.currentTimeMillis() + ".pdf";
+        String fileName = "BaoCaoDiemDanh_" + selectedClass.getTitle().replace(" ", "_") + "_"
+                + System.currentTimeMillis() + ".pdf";
 
         try {
             OutputStream fos;
@@ -239,10 +267,12 @@ public class StatisticsFragment extends Fragment {
                 contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "application/pdf");
                 contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
 
-                Uri uri = requireContext().getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues);
+                Uri uri = requireContext().getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI,
+                        contentValues);
                 fos = requireContext().getContentResolver().openOutputStream(uri);
             } else {
-                String filePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString();
+                String filePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                        .toString();
                 fos = new FileOutputStream(filePath + "/" + fileName);
             }
 
@@ -250,26 +280,38 @@ public class StatisticsFragment extends Fragment {
             PdfWriter.getInstance(document, fos);
             document.open();
 
-            document.add(new Paragraph("BÁO CÁO ĐIỂM DANH"));
+            document.add(new Paragraph("BÁO CÁO ĐIỂM DANH TỔNG HỢP"));
             document.add(new Paragraph("Lớp: " + selectedClass.getTitle()));
-            document.add(new Paragraph("Buổi học: " + new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date(latestSession.getStartTime()))));
+            document.add(new Paragraph("Số buổi học: " + sessions.size()));
             document.add(new Paragraph(" "));
 
-            PdfPTable table = new PdfPTable(4);
-            table.setWidthPercentage(100);
-            table.addCell("STT");
-            table.addCell("MSSV");
-            table.addCell("Họ và Tên");
-            table.addCell("Trạng thái");
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
 
-            int index = 1;
-            for (AttendanceStatus item : attendanceList) {
-                table.addCell(String.valueOf(index++));
-                table.addCell(item.getStudent().getMssv());
-                table.addCell(item.getStudent().getName());
-                table.addCell(item.getStatus());
+            for (AttendanceSession session : sessions) {
+                document.add(new Paragraph("--------------------------------------------------"));
+                document.add(new Paragraph("Buổi học: " + sdf.format(new Date(session.getStartTime()))));
+                document.add(new Paragraph(" "));
+
+                List<AttendanceStatus> attendanceList = attendanceRepository
+                        .getAttendanceStatusForSession(session.getId(), selectedClass.getId());
+
+                PdfPTable table = new PdfPTable(4);
+                table.setWidthPercentage(100);
+                table.addCell("STT");
+                table.addCell("MSSV");
+                table.addCell("Họ và Tên");
+                table.addCell("Trạng thái");
+
+                int index = 1;
+                for (AttendanceStatus item : attendanceList) {
+                    table.addCell(String.valueOf(index++));
+                    table.addCell(item.getStudent().getMssv());
+                    table.addCell(item.getStudent().getName());
+                    table.addCell(item.getStatus());
+                }
+                document.add(table);
+                document.add(new Paragraph(" ")); // Spacer between tables
             }
-            document.add(table);
 
             document.close();
             fos.close();

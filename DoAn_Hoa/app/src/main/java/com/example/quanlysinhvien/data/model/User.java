@@ -12,6 +12,7 @@ public class User implements Parcelable {
     private boolean passwordNeedsReset;
     private String deviceId;
     private String faceTemplate;
+    private String token;
     private long createdAt;
     private Long updatedAt;
 
@@ -26,6 +27,7 @@ public class User implements Parcelable {
         passwordNeedsReset = in.readByte() != 0;
         deviceId = in.readString();
         faceTemplate = in.readString();
+        token = in.readString();
         createdAt = in.readLong();
         if (in.readByte() == 0) {
             updatedAt = null;
@@ -44,6 +46,7 @@ public class User implements Parcelable {
         dest.writeByte((byte) (passwordNeedsReset ? 1 : 0));
         dest.writeString(deviceId);
         dest.writeString(faceTemplate);
+        dest.writeString(token);
         dest.writeLong(createdAt);
         if (updatedAt == null) {
             dest.writeByte((byte) 0);
@@ -94,6 +97,9 @@ public class User implements Parcelable {
 
     public String getFaceTemplate() { return faceTemplate; }
     public void setFaceTemplate(String faceTemplate) { this.faceTemplate = faceTemplate; }
+
+    public String getToken() { return token; }
+    public void setToken(String token) { this.token = token; }
 
     public long getCreatedAt() { return createdAt; }
     public void setCreatedAt(long createdAt) { this.createdAt = createdAt; }

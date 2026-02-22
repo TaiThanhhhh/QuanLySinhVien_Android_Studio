@@ -43,7 +43,8 @@ public class HistoryFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         binding = FragmentHistoryBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
@@ -123,6 +124,9 @@ public class HistoryFragment extends Fragment {
                 Context context = itemView.getContext();
 
                 binding.tvClassName.setText(record.getClassTitle());
+                binding.tvClassSubject.setText(record.getSubject());
+                binding.tvLecturerName
+                        .setText(record.getTeacherName() != null ? record.getTeacherName() : "Giảng viên: N/A");
                 binding.tvAttendanceDate.setText(dateFormat.format(new Date(record.getTimestamp())));
 
                 int statusTextRes;

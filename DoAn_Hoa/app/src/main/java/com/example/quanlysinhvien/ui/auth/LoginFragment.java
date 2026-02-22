@@ -83,6 +83,7 @@ public class LoginFragment extends Fragment {
 
         executor.execute(() -> {
             String androidId = Settings.Secure.getString(requireContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+            //String androidId = "MY_TEST_DEVICE_ID_001";
             AuthResult res = authService.login(mssv, pass, androidId);
 
             handler.post(() -> {
@@ -93,7 +94,7 @@ public class LoginFragment extends Fragment {
                     case SUCCESS:
                         User user = res.getUser();
                         SessionManager session = new SessionManager(requireContext());
-                        session.saveSession(user.getId(), user.getRole());
+                        session.saveSession(user.getId(), user.getRole(), res.getToken());
                         goToMainActivity();
                         break;
                     case NEEDS_PASSWORD_RESET:

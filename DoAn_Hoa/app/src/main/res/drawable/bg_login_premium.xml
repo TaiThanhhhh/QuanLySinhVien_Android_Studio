@@ -1,0 +1,82 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="1080dp"
+    android:height="1920dp"
+    android:viewportWidth="1080"
+    android:viewportHeight="1920">
+
+    <!-- Base Gradient Background -->
+    <path android:pathData="M0,0h1080v1920h-1080z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:centerX="540"
+                android:centerY="960"
+                android:gradientRadius="1200"
+                android:type="radial">
+                <item android:color="#1A237E" android:offset="0.0" /> <!-- Deep Indigo -->
+                <item android:color="#0D47A1" android:offset="0.6" /> <!-- Deep Blue -->
+                <item android:color="#010A1A" android:offset="1.0" /> <!-- Near Black -->
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Layer 1: Subtle Abstract Shapes (Soft Glow) -->
+    <group android:translateX="100" android:translateY="200" android:alpha="0.2">
+        <path android:pathData="M0,500 Q250,0 500,500 T1000,500"
+              android:strokeWidth="2"
+              android:strokeColor="#40FFFFFF"/>
+    </group>
+
+    <!-- Layer 2: Geometric Pattern (Hexagons) -->
+    <group android:alpha="0.05">
+        <path android:pathData="M100,100 l30,-20 l30,20 l0,40 l-30,20 l-30,-20 z" android:fillColor="#FFFFFF"/>
+        <path android:pathData="M200,150 l30,-20 l30,20 l0,40 l-30,20 l-30,-20 z" android:fillColor="#FFFFFF"/>
+        <path android:pathData="M300,100 l30,-20 l30,20 l0,40 l-30,20 l-30,-20 z" android:fillColor="#FFFFFF"/>
+        <path android:pathData="M800,400 l50,-30 l50,30 l0,60 l-50,30 l-50,-30 z" android:fillColor="#FFFFFF"/>
+        <path android:pathData="M150,1600 l40,-25 l40,25 l0,50 l-40,25 l-40,-25 z" android:fillColor="#FFFFFF"/>
+        <path android:pathData="M900,1400 l30,-20 l30,20 l0,40 l-30,20 l-30,-20 z" android:fillColor="#FFFFFF"/>
+    </group>
+
+    <!-- Layer 3: Dynamic Accent Lines -->
+    <path
+        android:pathData="M-100,1920 L400,1200 L1180,1920 Z"
+        android:alpha="0.05">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="400"
+                android:startY="1200"
+                android:endX="-100"
+                android:endY="1920"
+                android:type="linear">
+                <item android:color="#FFFFFF" android:offset="0.0" />
+                <item android:color="#00FFFFFF" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Layer 4: Floating "Connectivity" Dots -->
+    <group android:alpha="0.3">
+        <path android:pathData="M500,100 m-4,0 a4,4 0 1,1 8,0 a4,4 0 1,1 -8,0" android:fillColor="#00E5FF"/>
+        <path android:pathData="M550,120 m-2,0 a2,2 0 1,1 4,0 a2,2 0 1,1 -4,0" android:fillColor="#00E5FF"/>
+        <path android:pathData="M480,150 m-3,0 a3,3 0 1,1 6,0 a3,3 0 1,1 -6,0" android:fillColor="#00E5FF"/>
+        <path android:pathData="M900,1800 m-5,0 a5,5 0 1,1 10,0 a5,5 0 1,1 -10,0" android:fillColor="#00E5FF"/>
+    </group>
+
+    <!-- Sophisticated Bottom Wave -->
+    <path
+        android:pathData="M0,1700 C300,1600 700,1900 1080,1750 L1080,1920 L0,1920 Z"
+        android:alpha="0.15">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="540"
+                android:startY="1600"
+                android:endX="540"
+                android:endY="1920"
+                android:type="linear">
+                <item android:color="#00FFFFFF" android:offset="0.0" />
+                <item android:color="#FFFFFF" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+</vector>

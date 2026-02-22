@@ -37,7 +37,7 @@ public class AttendanceSessionRepository {
                 "attendance_sessions",
                 null, // all columns
                 "class_id = ?",
-                new String[]{String.valueOf(classId)},
+                new String[] { String.valueOf(classId) },
                 null, null, "start_ts DESC")) {
             while (c.moveToNext()) {
                 sessions.add(cursorToSession(c));
@@ -52,7 +52,7 @@ public class AttendanceSessionRepository {
                 "attendance_sessions",
                 null, // all columns
                 "class_id = ?",
-                new String[]{String.valueOf(classId)},
+                new String[] { String.valueOf(classId) },
                 null, null, "start_ts DESC", "1")) {
             if (c.moveToFirst()) {
                 return cursorToSession(c);

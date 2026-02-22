@@ -134,5 +134,33 @@
 
         </LinearLayout>
 
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_face_enrollment"
+            style="@style/CardStyle.Action"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_medium">
+
+            <LinearLayout style="@style/ActionCardContent"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="@dimen/padding_large">
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_student"
+                    app:tint="@color/primary" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/margin_medium"
+                    android:text="Đăng ký / Cập nhật khuôn mặt"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+                    android:textStyle="bold"
+                    android:textColor="@color/primary" />
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

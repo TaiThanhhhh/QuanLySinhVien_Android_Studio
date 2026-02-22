@@ -1,24 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <androidx.camera.view.PreviewView
-        android:id="@+id/camera_preview_enrollment"
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content">
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="Đăng ký khuôn mặt"
+            app:titleTextColor="@color/on_primary" />
+    </com.google.android.material.appbar.AppBarLayout>
 
-    <TextView
-        android:id="@+id/tv_enrollment_status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="32dp"
-        android:text="Vui lòng giữ khuôn mặt trong khung hình"
-        android:textColor="@android:color/white"
-        android:background="#80000000"
-        android:padding="8dp"
-        android:textSize="18sp" />
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
-</RelativeLayout>
+        <androidx.camera.view.PreviewView
+            android:id="@+id/camera_preview_enrollment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:id="@+id/tv_enrollment_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|center_horizontal"
+            android:layout_marginTop="32dp"
+            android:text="Vui lòng giữ khuôn mặt trong khung hình"
+            android:textColor="@android:color/white"
+            android:background="#80000000"
+            android:padding="12dp"
+            android:textSize="18sp"
+            android:textAlignment="center" />
+    </FrameLayout>
+
+</LinearLayout>

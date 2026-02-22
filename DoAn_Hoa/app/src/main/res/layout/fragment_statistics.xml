@@ -7,22 +7,19 @@
     android:background="@color/background"
     tools:context=".ui.admin.statistics.StatisticsFragment">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/padding_standard">
+        android:orientation="vertical"
+        android:padding="@dimen/padding_large">
 
+        <!-- Class Selector -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/til_class_filter"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/hint_search_class"
-            android:layout_marginEnd="@dimen/margin_medium"
-            app:layout_constraintEnd_toStartOf="@+id/btn_export_pdf"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
+            android:hint="@string/hint_search_class">
             <AutoCompleteTextView
                 android:id="@+id/actv_class_filter"
                 android:layout_width="match_parent"
@@ -30,79 +27,187 @@
                 android:hint="@string/hint_search_class" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_export_pdf"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="wrap_content"
+        <!-- ─── Summary Stat Cards ─── -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/btn_export_pdf"
-            android:paddingHorizontal="@dimen/padding_standard"
-            app:icon="@drawable/ic_baseline_add_24"
-            app:layout_constraintBottom_toBottomOf="@+id/til_class_filter"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/til_class_filter" />
+            android:orientation="horizontal"
+            android:layout_marginTop="@dimen/margin_large">
 
+            <!-- Total Sessions -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/CardStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="@dimen/margin_small"
+                app:cardBackgroundColor="@color/primary">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/padding_medium"
+                    android:gravity="center">
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_baseline_class_24"
+                        app:tint="@color/white" />
+                    <TextView
+                        android:id="@+id/tv_stat_sessions"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textSize="26sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/white"
+                        android:layout_marginTop="4dp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Buổi học"
+                        android:textColor="@color/white"
+                        android:alpha="0.85"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Enrolled Students -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/CardStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginHorizontal="@dimen/margin_small"
+                app:cardBackgroundColor="@color/secondary">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/padding_medium"
+                    android:gravity="center">
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_baseline_people_24"
+                        app:tint="@color/white" />
+                    <TextView
+                        android:id="@+id/tv_stat_enrolled"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textSize="26sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/white"
+                        android:layout_marginTop="4dp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Sinh viên"
+                        android:textColor="@color/white"
+                        android:alpha="0.85"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Attendance Rate -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/CardStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="@dimen/margin_small"
+                app:cardBackgroundColor="#4CAF50">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/padding_medium"
+                    android:gravity="center">
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_baseline_check_circle_24"
+                        app:tint="@color/white" />
+                    <TextView
+                        android:id="@+id/tv_stat_rate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="—"
+                        android:textSize="26sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/white"
+                        android:layout_marginTop="4dp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tỷ lệ có mặt"
+                        android:textColor="@color/white"
+                        android:alpha="0.85"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+
+        <!-- Pie Chart Card -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/card_pie_chart"
             style="@style/CardStyle"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_large"
-            android:layout_marginHorizontal="0dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/til_class_filter">
-
+            android:layout_marginTop="@dimen/margin_large">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="@dimen/padding_standard">
-
+                android:padding="@dimen/padding_large">
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/title_attendance_ratio"
                     style="@style/TitleText" />
-
                 <com.github.mikephil.charting.charts.PieChart
                     android:id="@+id/pie_chart_attendance"
                     android:layout_width="match_parent"
-                    android:layout_height="300dp"
+                    android:layout_height="280dp"
                     android:layout_marginTop="@dimen/margin_medium" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Line Chart Card -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/card_line_chart"
             style="@style/CardStyle"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_standard"
-            android:layout_marginHorizontal="0dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/card_pie_chart">
-
+            android:layout_marginTop="@dimen/margin_standard">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="@dimen/padding_standard">
-
+                android:padding="@dimen/padding_large">
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/title_attendance_timeline"
                     style="@style/TitleText" />
-
                 <com.github.mikephil.charting.charts.LineChart
                     android:id="@+id/line_chart_timeline"
                     android:layout_width="match_parent"
-                    android:layout_height="300dp"
+                    android:layout_height="280dp"
                     android:layout_marginTop="@dimen/margin_medium" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        <!-- Export Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_export_pdf"
+            style="@style/Widget.MaterialComponents.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_large"
+            android:text="@string/btn_export_pdf"
+            app:icon="@drawable/ic_baseline_add_24" />
+
+    </LinearLayout>
 </androidx.core.widget.NestedScrollView>

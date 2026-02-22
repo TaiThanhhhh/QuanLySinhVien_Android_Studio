@@ -60,18 +60,12 @@ public class CreateClassFragment extends Fragment implements SelectedStudentAdap
         if (getArguments() != null) {
             classId = getArguments().getLong("class_id", -1L);
         }
-
-        getParentFragmentManager().setFragmentResultListener(REQUEST_KEY, this, (requestKey, bundle) -> {
-            List<User> selectedStudents = bundle.getParcelableArrayList(BUNDLE_KEY);
-            if (selectedStudents != null) {
-                viewModel.setStudentList(selectedStudents);
-            }
-        });
     }
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         binding = FragmentCreateClassBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
@@ -84,10 +78,32 @@ public class CreateClassFragment extends Fragment implements SelectedStudentAdap
         setupRecyclerView();
         setupClickListeners();
 
+        // 1. Always update UI titles and buttons based on mode
         if (classId != -1) {
-            loadClassData();
+            updateTitlesForEditMode();
         } else {
-            setupCreateMode();
+            updateTitlesForCreateMode();
+        }
+
+        // 2. Load data from DB ONLY if ViewModel is empty (initial state)
+        // This prevents overwriting user selections when returning from picker
+        if (viewModel.getStudentList().getValue().isEmpty()) {
+            if (classId != -1) {
+                // Initial load for Edit Mode
+                loadClassDataFromDb();
+            } else {
+                // Initial load for Create Mode (just clear it once)
+                // We check savedInstanceState to avoid clearing on back navigation
+                if (savedInstanceState == null) {
+                    viewModel.clear();
+                }
+            }
+        }
+
+        // 3. ALWAYS populate the EditText fields from DB in edit mode
+        // Note: In a production app, these would be in the ViewModel
+        if (classId != -1) {
+            populateUiFromDb();
         }
 
         observeViewModel();
@@ -100,7 +116,11 @@ public class CreateClassFragment extends Fragment implements SelectedStudentAdap
     }
 
     private void setupCreateMode() {
-        viewModel.clear();
+        // Handled in onViewCreated to avoid clearing on back navigation
+        updateTitlesForCreateMode();
+    }
+
+    private void updateTitlesForCreateMode() {
         binding.tvCreateClassTitle.setText(getString(R.string.create_class_title));
         updateToolbarTitle(getString(R.string.create_class_title));
         binding.btnCreateClass.setText(getString(R.string.btn_create_class));
@@ -108,10 +128,12 @@ public class CreateClassFragment extends Fragment implements SelectedStudentAdap
 
     private void observeViewModel() {
         viewModel.getStudentList().observe(getViewLifecycleOwner(), students -> {
-            if (students == null) return;
+            if (students == null)
+                return;
             selectedStudentAdapter.submitList(students);
             int studentCount = students.size();
-            binding.tvStudentCount.setText(String.format(Locale.getDefault(), getString(R.string.selected_student_count), studentCount));
+            binding.tvStudentCount.setText(
+                    String.format(Locale.getDefault(), getString(R.string.selected_student_count), studentCount));
             binding.btnCreateClass.setEnabled(studentCount >= 8);
         });
     }
@@ -127,8 +149,7 @@ public class CreateClassFragment extends Fragment implements SelectedStudentAdap
                 "Bạn có chắc chắn muốn xóa " + student.getName() + " khỏi danh sách này không?",
                 R.drawable.ic_baseline_delete_24,
                 "Xóa",
-                "Hủy"
-        );
+                "Hủy");
 
         dialog.setOnResultListener(confirmed -> {
             if (confirmed) {
@@ -140,14 +161,15 @@ public class CreateClassFragment extends Fragment implements SelectedStudentAdap
         dialog.show(getParentFragmentManager(), "RemoveStudentConfirmation");
     }
 
-    private void loadClassData() {
-        ClassModel classModel = classRepository.getClassById(classId);
-        if (classModel == null) return;
+    private void loadClassDataFromDb() {
+        List<User> students = enrollmentRepository.getStudentsInClass(classId);
+        viewModel.setStudentList(students);
+    }
 
-        String formattedTitle = String.format(Locale.getDefault(), getString(R.string.edit_class_title_format), classModel.getTitle(), classModel.getSemester());
-        updateToolbarTitle(formattedTitle);
-        binding.tvCreateClassTitle.setText(formattedTitle);
-        binding.btnCreateClass.setText(getString(R.string.btn_update_class));
+    private void populateUiFromDb() {
+        ClassModel classModel = classRepository.getClassById(classId);
+        if (classModel == null)
+            return;
 
         binding.etClassName.setText(classModel.getTitle());
         binding.etSubject.setText(classModel.getSubject());
@@ -162,9 +184,20 @@ public class CreateClassFragment extends Fragment implements SelectedStudentAdap
         if (classModel.getEndDate() != null && classModel.getEndDate() > 0) {
             binding.etEndDate.setText(sdf.format(new Date(classModel.getEndDate())));
         }
+    }
 
-        List<User> students = enrollmentRepository.getStudentsInClass(classId);
-        viewModel.setStudentList(students);
+    private void updateTitlesForEditMode() {
+        ClassModel classModel = classRepository.getClassById(classId);
+        if (classModel != null)
+            updateTitlesForEditMode(classModel);
+    }
+
+    private void updateTitlesForEditMode(ClassModel classModel) {
+        String formattedTitle = String.format(Locale.getDefault(), getString(R.string.edit_class_title_format),
+                classModel.getTitle(), classModel.getSemester());
+        updateToolbarTitle(formattedTitle);
+        binding.tvCreateClassTitle.setText(formattedTitle);
+        binding.btnCreateClass.setText(getString(R.string.btn_update_class));
     }
 
     private void updateToolbarTitle(String title) {
@@ -182,7 +215,7 @@ public class CreateClassFragment extends Fragment implements SelectedStudentAdap
         binding.btnAddStudent.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
             List<User> currentStudents = viewModel.getStudentList().getValue();
-            if(currentStudents == null) {
+            if (currentStudents == null) {
                 currentStudents = new ArrayList<>();
             }
             bundle.putParcelableArrayList(BUNDLE_KEY, new ArrayList<>(currentStudents));
@@ -230,11 +263,13 @@ public class CreateClassFragment extends Fragment implements SelectedStudentAdap
         try {
             if (binding.etStartDate.getText() != null && !TextUtils.isEmpty(binding.etStartDate.getText().toString())) {
                 Date startDate = sdf.parse(binding.etStartDate.getText().toString());
-                if (startDate != null) classModel.setStartDate(startDate.getTime());
+                if (startDate != null)
+                    classModel.setStartDate(startDate.getTime());
             }
             if (binding.etEndDate.getText() != null && !TextUtils.isEmpty(binding.etEndDate.getText().toString())) {
                 Date endDate = sdf.parse(binding.etEndDate.getText().toString());
-                if (endDate != null) classModel.setEndDate(endDate.getTime());
+                if (endDate != null)
+                    classModel.setEndDate(endDate.getTime());
             }
         } catch (ParseException e) {
             Toast.makeText(getContext(), "Ngày tháng không hợp lệ", Toast.LENGTH_SHORT).show();
@@ -254,8 +289,7 @@ public class CreateClassFragment extends Fragment implements SelectedStudentAdap
                 "Bạn có chắc chắn muốn cập nhật thông tin lớp học này không? Hành động này sẽ ghi đè dữ liệu cũ.",
                 R.drawable.ic_baseline_check_circle_24,
                 "Cập nhật",
-                "Hủy"
-        );
+                "Hủy");
 
         dialog.setOnResultListener(confirmed -> {
             if (confirmed) {
@@ -274,8 +308,7 @@ public class CreateClassFragment extends Fragment implements SelectedStudentAdap
 
         if (success) {
             Toast.makeText(getContext(), "Cập nhật thành công!", Toast.LENGTH_SHORT).show();
-            NavOptions navOptions = new NavOptions.Builder().setPopUpTo(R.id.nav_create_class, true).build();
-            NavHostFragment.findNavController(this).navigate(R.id.nav_list_classes, null, navOptions);
+            NavHostFragment.findNavController(this).popBackStack(R.id.nav_list_classes, false);
         } else {
             Toast.makeText(getContext(), "Cập nhật thất bại", Toast.LENGTH_SHORT).show();
         }
@@ -295,13 +328,11 @@ public class CreateClassFragment extends Fragment implements SelectedStudentAdap
         if (success) {
             Toast.makeText(getContext(), "Tạo lớp thành công!", Toast.LENGTH_SHORT).show();
             clearForm();
-            NavOptions navOptions = new NavOptions.Builder().setPopUpTo(R.id.nav_create_class, true).build();
-            NavHostFragment.findNavController(this).navigate(R.id.nav_list_classes, null, navOptions);
+            NavHostFragment.findNavController(this).popBackStack(R.id.nav_list_classes, false);
         } else {
             Toast.makeText(getContext(), "Tạo lớp thất bại", Toast.LENGTH_SHORT).show();
         }
     }
-
 
     private void clearForm() {
         binding.etClassName.setText("");
@@ -319,13 +350,13 @@ public class CreateClassFragment extends Fragment implements SelectedStudentAdap
         new DatePickerDialog(
                 requireContext(),
                 (datePicker, year, month, dayOfMonth) -> {
-                    String selectedDate = String.format(Locale.getDefault(), "%02d/%02d/%d", dayOfMonth, month + 1, year);
+                    String selectedDate = String.format(Locale.getDefault(), "%02d/%02d/%d", dayOfMonth, month + 1,
+                            year);
                     editText.setText(selectedDate);
                 },
                 calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH)
-        ).show();
+                calendar.get(Calendar.DAY_OF_MONTH)).show();
     }
 
     @Override

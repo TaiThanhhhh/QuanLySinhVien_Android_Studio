@@ -2,6 +2,8 @@ package com.example.quanlysinhvien.data.model;
 
 public class AttendanceRecord {
     private String classTitle;
+    private String subject;
+    private String teacherName;
     private long timestamp;
     private String status;
 
@@ -12,6 +14,22 @@ public class AttendanceRecord {
 
     public void setClassTitle(String classTitle) {
         this.classTitle = classTitle;
+    }
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    public String getTeacherName() {
+        return teacherName;
+    }
+
+    public void setTeacherName(String teacherName) {
+        this.teacherName = teacherName;
     }
 
     public long getTimestamp() {

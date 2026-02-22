@@ -27,7 +27,7 @@
                 android:background="@drawable/bg_status_rounded"
                 android:backgroundTint="@color/primary"
                 android:padding="8dp"
-                android:src="@drawable/ic_launcher_foreground"
+                android:src="@drawable/ic_student"
                 app:tint="@color/on_primary" />
 
             <LinearLayout
