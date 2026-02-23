@@ -308,7 +308,7 @@ public class CreateClassFragment extends Fragment implements SelectedStudentAdap
 
         if (success) {
             Toast.makeText(getContext(), "Cập nhật thành công!", Toast.LENGTH_SHORT).show();
-            NavHostFragment.findNavController(this).popBackStack(R.id.nav_list_classes, false);
+            NavHostFragment.findNavController(this).navigateUp();
         } else {
             Toast.makeText(getContext(), "Cập nhật thất bại", Toast.LENGTH_SHORT).show();
         }
@@ -328,7 +328,7 @@ public class CreateClassFragment extends Fragment implements SelectedStudentAdap
         if (success) {
             Toast.makeText(getContext(), "Tạo lớp thành công!", Toast.LENGTH_SHORT).show();
             clearForm();
-            NavHostFragment.findNavController(this).popBackStack(R.id.nav_list_classes, false);
+            NavHostFragment.findNavController(this).navigateUp();
         } else {
             Toast.makeText(getContext(), "Tạo lớp thất bại", Toast.LENGTH_SHORT).show();
         }

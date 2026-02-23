@@ -4,6 +4,7 @@ public class AttendanceRecord {
     private String classTitle;
     private String subject;
     private String teacherName;
+    private long sessionTime;
     private long timestamp;
     private String status;
 
@@ -22,6 +23,14 @@ public class AttendanceRecord {
 
     public void setSubject(String subject) {
         this.subject = subject;
+    }
+
+    public long getSessionTime() {
+        return sessionTime;
+    }
+
+    public void setSessionTime(long sessionTime) {
+        this.sessionTime = sessionTime;
     }
 
     public String getTeacherName() {

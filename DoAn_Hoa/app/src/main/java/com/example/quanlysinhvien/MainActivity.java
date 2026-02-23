@@ -115,13 +115,6 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
 
-        // Attendance shortcut → navigate directly to attendance management
-        if (id == R.id.nav_menu_attendance) {
-            safeNavigate(R.id.nav_attendance_management);
-            item.setChecked(true);
-            return true;
-        }
-
         // nav_account is declared in the graph but not a nested graph root, navigate
         // directly
         if (id == R.id.nav_account) {

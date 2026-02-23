@@ -127,7 +127,7 @@ public class HistoryFragment extends Fragment {
                 binding.tvClassSubject.setText(record.getSubject());
                 binding.tvLecturerName
                         .setText(record.getTeacherName() != null ? record.getTeacherName() : "Giảng viên: N/A");
-                binding.tvAttendanceDate.setText(dateFormat.format(new Date(record.getTimestamp())));
+                binding.tvAttendanceDate.setText(dateFormat.format(new Date(record.getSessionTime())));
 
                 int statusTextRes;
                 int statusColorRes;
@@ -141,9 +141,13 @@ public class HistoryFragment extends Fragment {
                         statusTextRes = R.string.status_late;
                         statusColorRes = R.color.status_upcoming; // Yellow
                         break;
-                    default: // ABSENT or other statuses
+                    case "ABSENT":
                         statusTextRes = R.string.status_absent;
                         statusColorRes = R.color.status_locked; // Red
+                        break;
+                    default:
+                        statusTextRes = R.string.status_absent;
+                        statusColorRes = R.color.status_locked;
                         break;
                 }
 

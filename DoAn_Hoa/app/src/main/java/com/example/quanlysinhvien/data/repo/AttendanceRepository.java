@@ -58,20 +58,27 @@ public class AttendanceRepository {
     public List<AttendanceRecord> getAttendanceHistoryForStudent(long studentId) {
         List<AttendanceRecord> records = new ArrayList<>();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        String query = "SELECT c.title as class_title, c.subject, c.teacher_name, a.timestamp, a.status " +
-                "FROM attendance_records a " +
-                "JOIN attendance_sessions s ON a.session_id = s.id " +
-                "JOIN classes c ON s.class_id = c.id " +
-                "WHERE a.student_id = ? " +
-                "ORDER BY a.timestamp DESC";
+
+        // Comprehensive query: All sessions for any class the student is enrolled in,
+        // left joined with actual attendance records to show ABSENT sessions too.
+        String query = "SELECT c.title AS class_title, c.subject, c.teacher_name, s.start_ts AS session_time, " +
+                "COALESCE(ar.status, 'ABSENT') AS status, ar.timestamp AS recorded_at " +
+                "FROM class_students cs " +
+                "JOIN classes c ON cs.class_id = c.id " +
+                "JOIN attendance_sessions s ON c.id = s.class_id " +
+                "LEFT JOIN attendance_records ar ON s.id = ar.session_id AND ar.student_id = cs.student_id " +
+                "WHERE cs.student_id = ? " +
+                "ORDER BY s.start_ts DESC";
+
         try (Cursor cursor = db.rawQuery(query, new String[] { String.valueOf(studentId) })) {
             while (cursor.moveToNext()) {
                 AttendanceRecord record = new AttendanceRecord();
                 record.setClassTitle(cursor.getString(cursor.getColumnIndexOrThrow("class_title")));
                 record.setSubject(cursor.getString(cursor.getColumnIndexOrThrow("subject")));
                 record.setTeacherName(cursor.getString(cursor.getColumnIndexOrThrow("teacher_name")));
-                record.setTimestamp(cursor.getLong(cursor.getColumnIndexOrThrow("timestamp")));
+                record.setSessionTime(cursor.getLong(cursor.getColumnIndexOrThrow("session_time")));
                 record.setStatus(cursor.getString(cursor.getColumnIndexOrThrow("status")));
+                record.setTimestamp(cursor.getLong(cursor.getColumnIndexOrThrow("recorded_at")));
                 records.add(record);
             }
         }

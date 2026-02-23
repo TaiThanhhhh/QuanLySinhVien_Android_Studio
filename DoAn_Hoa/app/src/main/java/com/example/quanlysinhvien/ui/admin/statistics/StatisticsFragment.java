@@ -45,10 +45,19 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Document;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+
+import java.io.File;
 
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -152,29 +161,62 @@ public class StatisticsFragment extends Fragment {
     }
 
     private void loadChartData(long classId) {
-        // --- Stat cards ---
-        int sessionCount = sessionRepository.getSessionsForClass(classId).size();
+        List<AttendanceSession> sessions = sessionRepository.getSessionsForClass(classId);
         int enrolledCount = enrollmentRepository.getStudentsInClass(classId).size();
+
         if (tvStatSessions != null)
-            tvStatSessions.setText(String.valueOf(sessionCount));
+            tvStatSessions.setText(String.valueOf(sessions.size()));
         if (tvStatEnrolled != null)
             tvStatEnrolled.setText(String.valueOf(enrolledCount));
 
-        AttendanceSession latestSession = sessionRepository.getLatestSessionForClass(classId);
-        if (latestSession != null) {
-            loadPieChartData(latestSession.getId(), classId);
-            loadLineChartData(latestSession.getId());
-            // Calculate attendance rate from latest session
-            if (tvStatRate != null && enrolledCount > 0) {
-                List<StatusCount> counts = attendanceRepository.getAttendanceStatusCounts(latestSession.getId());
-                int present = 0;
-                for (StatusCount sc : counts)
-                    present += sc.getCount();
-                int rate = (int) Math.round((present * 100.0) / enrolledCount);
-                tvStatRate.setText(rate + "%");
-            } else if (tvStatRate != null) {
-                tvStatRate.setText("—");
+        if (!sessions.isEmpty()) {
+            // Aggregated Summary Data
+            int totalPresentAll = 0;
+            int totalLateAll = 0;
+            int totalAbsentAll = 0;
+
+            ArrayList<Entry> lineEntries = new ArrayList<>();
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM", Locale.getDefault());
+            int sessionIndex = 0;
+
+            // Sort sessions by time ascending for the line chart
+            sessions.sort((s1, s2) -> Long.compare(s1.getStartTime(), s2.getStartTime()));
+
+            for (AttendanceSession session : sessions) {
+                List<StatusCount> counts = attendanceRepository.getAttendanceStatusCounts(session.getId());
+                int sessionPresent = 0;
+                int sessionLate = 0;
+                for (StatusCount sc : counts) {
+                    if ("ON_TIME".equals(sc.getStatus())) {
+                        sessionPresent += sc.getCount();
+                    } else if ("LATE".equals(sc.getStatus())) {
+                        sessionLate += sc.getCount();
+                    }
+                }
+
+                totalPresentAll += sessionPresent;
+                totalLateAll += sessionLate;
+                totalAbsentAll += Math.max(0, enrolledCount - (sessionPresent + sessionLate));
+
+                // Attendance rate for this specific session
+                float sessionRate = enrolledCount > 0 ? (float) (sessionPresent + sessionLate) * 100f / enrolledCount
+                        : 0f;
+                lineEntries.add(new Entry(sessionIndex++, sessionRate));
             }
+
+            // Stat Rate: Average across all sessions
+            if (tvStatRate != null && enrolledCount > 0) {
+                int totalPossible = sessions.size() * enrolledCount;
+                int avgRate = (int) Math.round(((totalPresentAll + totalLateAll) * 100.0) / totalPossible);
+                tvStatRate.setText(avgRate + "%");
+            }
+
+            // Pie Chart: Cumulative Distribution
+            loadPieChartAggregated(totalPresentAll, totalLateAll, totalAbsentAll);
+
+            // Line Chart: Rate Trend
+            loadLineChartTrend(lineEntries);
+
         } else {
             pieChart.clear();
             lineChart.clear();
@@ -184,56 +226,37 @@ public class StatisticsFragment extends Fragment {
         }
     }
 
-    private void loadPieChartData(long sessionId, long classId) {
-        List<StatusCount> statusCounts = attendanceRepository.getAttendanceStatusCounts(sessionId);
-        int totalStudents = enrollmentRepository.getStudentsInClass(classId).size();
-        int presentStudents = 0;
-
+    private void loadPieChartAggregated(int onTime, int late, int absent) {
         ArrayList<PieEntry> entries = new ArrayList<>();
-        for (StatusCount sc : statusCounts) {
-            String statusLabel = sc.getStatus().equals("ON_TIME") ? "Đúng giờ" : "Đi muộn";
-            entries.add(new PieEntry(sc.getCount(), statusLabel));
-            presentStudents += sc.getCount();
-        }
-
-        int absentCount = totalStudents - presentStudents;
-        if (absentCount > 0) {
-            entries.add(new PieEntry(absentCount, "Vắng"));
-        }
+        if (onTime > 0)
+            entries.add(new PieEntry(onTime, "Đúng giờ"));
+        if (late > 0)
+            entries.add(new PieEntry(late, "Đi muộn"));
+        if (absent > 0)
+            entries.add(new PieEntry(absent, "Vắng"));
 
         PieDataSet dataSet = new PieDataSet(entries, "");
         dataSet.setColors(ColorTemplate.MATERIAL_COLORS);
         dataSet.setValueTextSize(14f);
         dataSet.setValueTextColor(Color.BLACK);
 
-        PieData pieData = new PieData(dataSet);
-        pieChart.setData(pieData);
-        pieChart.invalidate(); // refresh
+        pieChart.setData(new PieData(dataSet));
+        pieChart.invalidate();
     }
 
-    private void loadLineChartData(long sessionId) {
-        List<TimestampCount> timelineData = attendanceRepository.getAttendanceTimeline(sessionId);
-        if (timelineData.isEmpty()) {
-            lineChart.clear();
-            return;
-        }
-
-        ArrayList<Entry> entries = new ArrayList<>();
-        long firstTimestamp = timelineData.get(0).getTimestamp();
-        int cumulativeCount = 0;
-
-        for (TimestampCount tc : timelineData) {
-            cumulativeCount += tc.getCount();
-            long timeDiffMinutes = TimeUnit.MILLISECONDS.toMinutes(tc.getTimestamp() - firstTimestamp);
-            entries.add(new Entry(timeDiffMinutes, cumulativeCount));
-        }
-
-        LineDataSet dataSet = new LineDataSet(entries, "Số sinh viên điểm danh");
+    private void loadLineChartTrend(ArrayList<Entry> entries) {
+        LineDataSet dataSet = new LineDataSet(entries, "Tỉ lệ chuyên cần (%)");
         dataSet.setLineWidth(2.5f);
         dataSet.setCircleRadius(4.5f);
-        LineData lineData = new LineData(dataSet);
-        lineChart.setData(lineData);
-        lineChart.invalidate(); // refresh
+        dataSet.setDrawValues(true);
+        dataSet.setColor(ColorTemplate.JOYFUL_COLORS[0]);
+        dataSet.setCircleColor(ColorTemplate.JOYFUL_COLORS[0]);
+
+        lineChart.setData(new LineData(dataSet));
+        lineChart.getXAxis().setGranularity(1f);
+        lineChart.getAxisLeft().setAxisMaximum(100f);
+        lineChart.getAxisLeft().setAxisMinimum(0f);
+        lineChart.invalidate();
     }
 
     private void checkPermissionAndExport() {
@@ -241,11 +264,19 @@ public class StatisticsFragment extends Fragment {
             Toast.makeText(getContext(), "Vui lòng chọn một lớp học", Toast.LENGTH_SHORT).show();
             return;
         }
-        if (ContextCompat.checkSelfPermission(requireContext(),
-                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+
+        // Android 10 (Q) and above uses Scoped Storage and MediaStore.Downloads
+        // which does NOT require WRITE_EXTERNAL_STORAGE permission for adding new
+        // files.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             exportPdf();
         } else {
-            requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            if (ContextCompat.checkSelfPermission(requireContext(),
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                exportPdf();
+            } else {
+                requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            }
         }
     }
 
@@ -276,20 +307,64 @@ public class StatisticsFragment extends Fragment {
                 fos = new FileOutputStream(filePath + "/" + fileName);
             }
 
+            // Define Fonts - Using system font for Vietnamese support
+            Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18, BaseColor.BLACK);
+            Font headerFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, BaseColor.WHITE);
+            Font normalFont = FontFactory.getFont(FontFactory.HELVETICA, 11, BaseColor.BLACK);
+
+            // Attempt to load system font for Unicode support (Vietnamese)
+            try {
+                String[] fontPaths = {
+                        "/system/fonts/NotoSansVietnamese-Regular.ttf",
+                        "/system/fonts/DroidSans.ttf",
+                        "/system/fonts/Roboto-Regular.ttf"
+                };
+                BaseFont baseFont = null;
+                for (String path : fontPaths) {
+                    try {
+                        File file = new File(path);
+                        if (file.exists()) {
+                            baseFont = BaseFont.createFont(path, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+                            break;
+                        }
+                    } catch (Exception ignored) {
+                    }
+                }
+
+                if (baseFont != null) {
+                    titleFont = new Font(baseFont, 18, Font.BOLD, BaseColor.BLACK);
+                    headerFont = new Font(baseFont, 12, Font.BOLD, BaseColor.WHITE);
+                    normalFont = new Font(baseFont, 11, Font.NORMAL, BaseColor.BLACK);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             Document document = new Document();
             PdfWriter.getInstance(document, fos);
             document.open();
 
-            document.add(new Paragraph("BÁO CÁO ĐIỂM DANH TỔNG HỢP"));
-            document.add(new Paragraph("Lớp: " + selectedClass.getTitle()));
-            document.add(new Paragraph("Số buổi học: " + sessions.size()));
+            // Report Title
+            Paragraph title = new Paragraph("BÁO CÁO TỔNG HỢP ĐIỂM DANH", titleFont);
+            title.setAlignment(Element.ALIGN_CENTER);
+            document.add(title);
+            document.add(new Paragraph(" "));
+
+            // Class Information
+            document.add(new Paragraph("Lớp học: " + selectedClass.getTitle(), normalFont));
+            document.add(new Paragraph("Môn học: " + selectedClass.getSubject(), normalFont));
+            document.add(new Paragraph("Tổng số buổi: " + sessions.size(), normalFont));
+            document.add(new Paragraph(
+                    "Ngày xuất báo cáo: " + new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(new Date()),
+                    normalFont));
             document.add(new Paragraph(" "));
 
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
 
             for (AttendanceSession session : sessions) {
-                document.add(new Paragraph("--------------------------------------------------"));
-                document.add(new Paragraph("Buổi học: " + sdf.format(new Date(session.getStartTime()))));
+                Paragraph sessionHeader = new Paragraph("Buổi học: " + sdf.format(new Date(session.getStartTime())),
+                        new Font(titleFont.getBaseFont(), 13, Font.BOLD, new BaseColor(0, 102, 204)));
+                document.add(sessionHeader);
                 document.add(new Paragraph(" "));
 
                 List<AttendanceStatus> attendanceList = attendanceRepository
@@ -297,29 +372,62 @@ public class StatisticsFragment extends Fragment {
 
                 PdfPTable table = new PdfPTable(4);
                 table.setWidthPercentage(100);
-                table.addCell("STT");
-                table.addCell("MSSV");
-                table.addCell("Họ và Tên");
-                table.addCell("Trạng thái");
+                table.setSpacingBefore(10f);
+                table.setSpacingAfter(10f);
+                table.setWidths(new float[] { 1, 3, 5, 3 });
+
+                // Styling headers
+                PdfPCell cell;
+                String[] headers = { "STT", "MSSV", "Họ và Tên", "Trạng thái" };
+                for (String header : headers) {
+                    cell = new PdfPCell(new Phrase(header, headerFont));
+                    cell.setBackgroundColor(new BaseColor(0, 51, 102));
+                    cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                    cell.setPadding(8f);
+                    table.addCell(cell);
+                }
 
                 int index = 1;
                 for (AttendanceStatus item : attendanceList) {
-                    table.addCell(String.valueOf(index++));
-                    table.addCell(item.getStudent().getMssv());
-                    table.addCell(item.getStudent().getName());
-                    table.addCell(item.getStatus());
+                    table.addCell(createCell(String.valueOf(index++), normalFont, Element.ALIGN_CENTER));
+                    table.addCell(createCell(item.getStudent().getMssv(), normalFont, Element.ALIGN_CENTER));
+                    table.addCell(createCell(item.getStudent().getName(), normalFont, Element.ALIGN_LEFT));
+
+                    // Localization for status
+                    String status = item.getStatus();
+                    String displayStatus = status;
+                    if ("ON_TIME".equals(status))
+                        displayStatus = "CÓ MẶT";
+                    else if ("LATE".equals(status))
+                        displayStatus = "ĐI MUỘN";
+                    else if ("ABSENT".equals(status))
+                        displayStatus = "VẮNG";
+
+                    PdfPCell statusCell = createCell(displayStatus, normalFont, Element.ALIGN_CENTER);
+                    if ("ABSENT".equals(status)) {
+                        statusCell.setBackgroundColor(new BaseColor(255, 230, 230)); // Light red for absent
+                    }
+                    table.addCell(statusCell);
                 }
                 document.add(table);
-                document.add(new Paragraph(" ")); // Spacer between tables
+                document.add(new Paragraph(" ")); // Spacer
             }
 
             document.close();
             fos.close();
-            Toast.makeText(getContext(), "Đã xuất file PDF thành công vào thư mục Downloads", Toast.LENGTH_LONG).show();
-
+            Toast.makeText(getContext(), "Đã xuất báo cáo PDF thành công vào thư mục Downloads", Toast.LENGTH_LONG)
+                    .show();
         } catch (Exception e) {
-            Log.e(TAG, "Error exporting PDF", e);
-            Toast.makeText(getContext(), "Lỗi khi xuất file PDF", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+            Toast.makeText(getContext(), "Lỗi khi xuất PDF: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private PdfPCell createCell(String text, Font font, int alignment) {
+        PdfPCell cell = new PdfPCell(new Phrase(text, font));
+        cell.setPadding(6f);
+        cell.setHorizontalAlignment(alignment);
+        cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        return cell;
     }
 }

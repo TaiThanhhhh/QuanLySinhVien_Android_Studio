@@ -57,7 +57,7 @@ public class AdminDashboardFragment extends Fragment {
                 v -> NavHostFragment.findNavController(this).navigate(R.id.nav_reports));
 
         view.findViewById(R.id.card_action_view_classes).setOnClickListener(
-                v -> NavHostFragment.findNavController(this).navigate(R.id.nav_class_management));
+                v -> NavHostFragment.findNavController(this).navigate(R.id.action_dashboard_to_list_classes));
 
         loadDashboardStats();
     }
