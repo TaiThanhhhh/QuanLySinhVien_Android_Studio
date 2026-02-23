@@ -151,12 +151,6 @@ public class StudentSelectionAdapter extends ListAdapter<User, StudentSelectionA
             binding.tvStudentNameSelection.setTextColor(textColor);
             binding.tvStudentIdSelection.setTextColor(textColor);
 
-            // Icon tint logic
-            int iconColor = isSelected
-                    ? ContextCompat.getColor(itemView.getContext(), android.R.color.white)
-                    : ContextCompat.getColor(itemView.getContext(), R.color.primary);
-            binding.ivStudentAvatarSelection.setImageTintList(ColorStateList.valueOf(iconColor));
-
             // Stroke to make it pop
             binding.getRoot().setStrokeWidth(isSelected ? 3 : 0);
             binding.getRoot().setStrokeColor(

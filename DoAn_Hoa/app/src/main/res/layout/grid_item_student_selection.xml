@@ -15,37 +15,25 @@
         android:layout_height="wrap_content"
         android:padding="8dp">
 
-        <ImageView
-            android:id="@+id/iv_student_avatar_selection"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/ic_baseline_person_24"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            tools:ignore="ContentDescription" />
-
         <TextView
             android:id="@+id/tv_student_name_selection"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
             android:textStyle="bold"
-            app:layout_constraintStart_toEndOf="@+id/iv_student_avatar_selection"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/checkbox_student_select"
+            app:layout_constraintEnd_toStartOf="@+id/iv_check_selection"
             tools:text="Nguyen Van A" />
 
         <TextView
             android:id="@+id/tv_student_id_selection"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
-            app:layout_constraintStart_toEndOf="@+id/iv_student_avatar_selection"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tv_student_name_selection"
-            app:layout_constraintEnd_toStartOf="@+id/checkbox_student_select"
+            app:layout_constraintEnd_toStartOf="@+id/iv_check_selection"
             tools:text="2018123456" />
 
         <ImageView

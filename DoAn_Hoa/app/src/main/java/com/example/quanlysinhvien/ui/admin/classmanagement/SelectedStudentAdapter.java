@@ -72,8 +72,6 @@ public class SelectedStudentAdapter extends ListAdapter<User, SelectedStudentAda
             binding.tvStudentName.setTextColor(whiteColor);
             binding.tvStudentId.setTextColor(whiteColor);
 
-            // Icon tints
-            binding.ivStudentAvatar.setImageTintList(ColorStateList.valueOf(whiteColor));
             binding.btnRemoveStudent.setImageTintList(ColorStateList.valueOf(whiteColor));
         }
     }

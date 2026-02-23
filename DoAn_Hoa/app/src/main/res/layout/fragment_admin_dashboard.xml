@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="@dimen/padding_large">
+        android:padding="@dimen/padding_standard">
 
         <!-- Welcome Section -->
         <LinearLayout
@@ -55,138 +55,138 @@
         </LinearLayout>
 
         <!-- Stats Overview Cards -->
-        <HorizontalScrollView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/margin_large"
-            android:clipToPadding="false"
-            android:scrollbars="none">
+            android:orientation="horizontal">
 
-            <LinearLayout
-                android:layout_width="wrap_content"
+            <!-- Total Classes Card -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/CardStyle"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_weight="1"
+                app:cardBackgroundColor="@color/primary">
 
-                <!-- Total Classes Card -->
-                <com.google.android.material.card.MaterialCardView
-                    style="@style/CardStyle"
-                    android:layout_width="160dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="@dimen/margin_medium"
-                    app:cardBackgroundColor="@color/primary">
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="@dimen/padding_medium">
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_baseline_class_24"
+                        app:tint="@color/on_primary" />
+
+                    <TextView
+                        android:id="@+id/tv_total_classes"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="@dimen/padding_medium">
+                        android:layout_marginTop="4dp"
+                        android:text="0"
+                        android:textColor="@color/on_primary"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
 
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_baseline_class_24"
-                            app:tint="@color/on_primary" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:alpha="0.8"
+                        android:text="Lớp học"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+                        android:textColor="@color/on_primary" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-                        <TextView
-                            android:id="@+id/tv_total_classes"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/margin_medium"
-                            android:text="0"
-                            android:textColor="@color/on_primary"
-                            android:textSize="28sp"
-                            android:textStyle="bold" />
+            <!-- Total Students Card -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/CardStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:cardBackgroundColor="@color/secondary">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:alpha="0.8"
-                            android:text="Tổng số lớp"
-                            android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
-                            android:textColor="@color/on_primary" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <!-- Total Students Card -->
-                <com.google.android.material.card.MaterialCardView
-                    style="@style/CardStyle"
-                    android:layout_width="160dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="@dimen/margin_medium"
-                    app:cardBackgroundColor="@color/secondary">
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="@dimen/padding_medium">
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_baseline_people_24"
+                        app:tint="@color/on_secondary" />
+
+                    <TextView
+                        android:id="@+id/tv_total_students"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="@dimen/padding_medium">
+                        android:layout_marginTop="4dp"
+                        android:text="0"
+                        android:textColor="@color/on_secondary"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
 
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_baseline_people_24"
-                            app:tint="@color/on_secondary" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:alpha="0.8"
+                        android:text="Sinh viên"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+                        android:textColor="@color/on_secondary" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-                        <TextView
-                            android:id="@+id/tv_total_students"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/margin_medium"
-                            android:text="0"
-                            android:textColor="@color/on_secondary"
-                            android:textSize="28sp"
-                            android:textStyle="bold" />
+            <!-- Today's Attendance -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/CardStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:cardBackgroundColor="#4CAF50">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:alpha="0.8"
-                            android:text="Sinh viên hoạt động"
-                            android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
-                            android:textColor="@color/on_secondary" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <!-- Today's Attendance (icon changed) -->
-                <com.google.android.material.card.MaterialCardView
-                    style="@style/CardStyle"
-                    android:layout_width="160dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:cardBackgroundColor="#4CAF50">
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="@dimen/padding_medium">
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_baseline_calendar_today_24"
+                        app:tint="@color/white" />
+
+                    <TextView
+                        android:id="@+id/tv_today_attendance"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="@dimen/padding_medium">
+                        android:layout_marginTop="4dp"
+                        android:text="0"
+                        android:textColor="@color/white"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
 
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_baseline_calendar_today_24"
-                            app:tint="@color/white" />
-
-                        <TextView
-                            android:id="@+id/tv_today_attendance"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/margin_medium"
-                            android:text="0"
-                            android:textColor="@color/white"
-                            android:textSize="28sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:alpha="0.8"
-                            android:text="Điểm danh hôm nay"
-                            android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
-                            android:textColor="@color/white" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-            </LinearLayout>
-        </HorizontalScrollView>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:alpha="0.8"
+                        android:text="Hôm nay"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+                        android:textColor="@color/white" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
 
         <!-- Quick Actions -->
         <TextView
@@ -240,7 +240,7 @@
 
                     <TextView
                         style="@style/ActionCardText"
-                        android:text="Xem sinh viên" />
+                        android:text="Sinh viên" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

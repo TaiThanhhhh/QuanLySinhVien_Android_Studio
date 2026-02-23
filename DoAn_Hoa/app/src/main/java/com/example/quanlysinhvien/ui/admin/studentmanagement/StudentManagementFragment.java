@@ -36,7 +36,8 @@ public class StudentManagementFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_student_management, container, false);
     }
 
@@ -46,7 +47,8 @@ public class StudentManagementFragment extends Fragment {
 
         etSearch = view.findViewById(R.id.et_search_student);
         RecyclerView recyclerView = view.findViewById(R.id.rv_student_list);
-        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 4));
+        int spanCount = getResources().getInteger(R.integer.student_grid_span_count);
+        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), spanCount));
 
         adapter = new StudentManagementAdapter(this::onEditStudent, this::onDeleteStudent);
         recyclerView.setAdapter(adapter);
@@ -55,7 +57,8 @@ public class StudentManagementFragment extends Fragment {
 
         etSearch.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -63,7 +66,8 @@ public class StudentManagementFragment extends Fragment {
             }
 
             @Override
-            public void afterTextChanged(Editable s) {}
+            public void afterTextChanged(Editable s) {
+            }
         });
 
         view.findViewById(R.id.fab_add_student).setOnClickListener(v -> {
@@ -88,8 +92,7 @@ public class StudentManagementFragment extends Fragment {
                 getString(R.string.confirm_delete_student_message, student.getName()),
                 R.drawable.ic_baseline_delete_24,
                 getString(R.string.btn_delete),
-                "Hủy"
-        );
+                "Hủy");
 
         dialog.setOnResultListener(confirmed -> {
             if (confirmed) {

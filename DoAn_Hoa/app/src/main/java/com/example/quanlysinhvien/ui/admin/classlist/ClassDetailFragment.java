@@ -44,7 +44,8 @@ public class ClassDetailFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         binding = FragmentClassDetailBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
@@ -60,7 +61,8 @@ public class ClassDetailFragment extends Fragment {
 
     private void setupRecyclerView() {
         adapter = new StudentInClassAdapter(); // Listener removed
-        binding.rvEnrolledStudents.setLayoutManager(new GridLayoutManager(getContext(), 4));
+        int spanCount = getResources().getInteger(R.integer.student_grid_span_count);
+        binding.rvEnrolledStudents.setLayoutManager(new GridLayoutManager(getContext(), spanCount));
         binding.rvEnrolledStudents.setAdapter(adapter);
     }
 
@@ -80,7 +82,8 @@ public class ClassDetailFragment extends Fragment {
 
     private void loadClassDetails() {
         ClassModel classModel = classRepository.getClassById(classId);
-        if (classModel == null) return;
+        if (classModel == null)
+            return;
 
         binding.tvClassNameDetail.setText(classModel.getTitle());
         binding.tvClassSubjectDetail.setText(classModel.getSubject());
@@ -89,17 +92,33 @@ public class ClassDetailFragment extends Fragment {
         binding.tvRoomDetail.setText(classModel.getRoom());
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-        String startDate = (classModel.getStartDate() != null && classModel.getStartDate() > 0) ? sdf.format(new Date(classModel.getStartDate())) : "N/A";
-        String endDate = (classModel.getEndDate() != null && classModel.getEndDate() > 0) ? sdf.format(new Date(classModel.getEndDate())) : "N/A";
+        String startDate = (classModel.getStartDate() != null && classModel.getStartDate() > 0)
+                ? sdf.format(new Date(classModel.getStartDate()))
+                : "N/A";
+        String endDate = (classModel.getEndDate() != null && classModel.getEndDate() > 0)
+                ? sdf.format(new Date(classModel.getEndDate()))
+                : "N/A";
         binding.tvStartEndDateDetail.setText(String.format("%s - %s", startDate, endDate));
 
         ClassModel.Status status = classModel.getCalculatedStatus();
         int statusColorRes, statusTextRes;
         switch (status) {
-            case ONGOING: statusTextRes = R.string.class_status_ongoing; statusColorRes = R.color.status_ongoing; break;
-            case UPCOMING: statusTextRes = R.string.class_status_upcoming; statusColorRes = R.color.status_upcoming; break;
-            case FINISHED: statusTextRes = R.string.class_status_finished; statusColorRes = R.color.status_finished; break;
-            default: statusTextRes = R.string.class_status_locked; statusColorRes = R.color.status_locked; break;
+            case ONGOING:
+                statusTextRes = R.string.class_status_ongoing;
+                statusColorRes = R.color.status_ongoing;
+                break;
+            case UPCOMING:
+                statusTextRes = R.string.class_status_upcoming;
+                statusColorRes = R.color.status_upcoming;
+                break;
+            case FINISHED:
+                statusTextRes = R.string.class_status_finished;
+                statusColorRes = R.color.status_finished;
+                break;
+            default:
+                statusTextRes = R.string.class_status_locked;
+                statusColorRes = R.color.status_locked;
+                break;
         }
         binding.tvClassStatusDetail.setText(getString(statusTextRes));
         binding.tvClassStatusDetail.setTextColor(ContextCompat.getColor(requireContext(), statusColorRes));
