@@ -28,7 +28,7 @@ public class UserRepository {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put("face_template", faceTemplate);
-        int rows = db.update("users", cv, "id = ?", new String[]{String.valueOf(userId)});
+        int rows = db.update("users", cv, "id = ?", new String[] { String.valueOf(userId) });
         return rows > 0;
     }
 
@@ -36,12 +36,12 @@ public class UserRepository {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         List<User> list = new ArrayList<>();
         String selection = "role = ?";
-        String[] selectionArgs = {"STUDENT"};
+        String[] selectionArgs = { "STUDENT" };
 
-        if(filter != null && !filter.isEmpty()) {
+        if (filter != null && !filter.isEmpty()) {
             selection += " AND (name LIKE ? OR mssv LIKE ?)";
             String likeFilter = "%" + filter + "%";
-            selectionArgs = new String[]{"STUDENT", likeFilter, likeFilter};
+            selectionArgs = new String[] { "STUDENT", likeFilter, likeFilter };
         }
 
         try (Cursor c = db.query("users", null, selection, selectionArgs, null, null, "name ASC")) {
@@ -59,14 +59,15 @@ public class UserRepository {
         cv.put("mssv", u.getMssv());
         cv.put("updated_at", System.currentTimeMillis());
 
-        int rows = db.update("users", cv, "id = ?", new String[]{String.valueOf(u.getId())});
-        if (rows > 0) auditRepo.log("USER_UPDATE", null, String.valueOf(u.getId()), u.getName());
+        int rows = db.update("users", cv, "id = ?", new String[] { String.valueOf(u.getId()) });
+        if (rows > 0)
+            auditRepo.log("USER_UPDATE", null, String.valueOf(u.getId()), u.getName());
         return rows > 0;
     }
 
     public User getUserByMssv(String mssv) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        try (Cursor c = db.query("users", null, "mssv = ?", new String[]{mssv}, null, null, null)) {
+        try (Cursor c = db.query("users", null, "mssv = ?", new String[] { mssv }, null, null, null)) {
             if (c.moveToFirst()) {
                 return cursorToUser(c);
             }
@@ -76,7 +77,7 @@ public class UserRepository {
 
     public User getUserById(long id) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        try (Cursor c = db.query("users", null, "id = ?", new String[]{String.valueOf(id)}, null, null, null)) {
+        try (Cursor c = db.query("users", null, "id = ?", new String[] { String.valueOf(id) }, null, null, null)) {
             if (c.moveToFirst()) {
                 return cursorToUser(c);
             }
@@ -85,7 +86,8 @@ public class UserRepository {
     }
 
     public boolean verifyPassword(User u, String password) {
-        if (u == null || u.getPasswordHash() == null) return false;
+        if (u == null || u.getPasswordHash() == null)
+            return false;
         try {
             return HashUtil.verifyPassword(password, u.getPasswordHash());
         } catch (Exception e) {
@@ -97,23 +99,25 @@ public class UserRepository {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put("device_id", androidId);
-        int rows = db.update("users", cv, "id = ?", new String[]{String.valueOf(userId)});
+        int rows = db.update("users", cv, "id = ?", new String[] { String.valueOf(userId) });
         return rows > 0;
     }
-    
+
     public boolean resetDeviceBinding(long userId) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.putNull("device_id");
-        int rows = db.update("users", cv, "id = ?", new String[]{String.valueOf(userId)});
-        if (rows > 0) auditRepo.log("DEVICE_RESET", null, String.valueOf(userId), "device unbound");
+        int rows = db.update("users", cv, "id = ?", new String[] { String.valueOf(userId) });
+        if (rows > 0)
+            auditRepo.log("DEVICE_RESET", null, String.valueOf(userId), "device unbound");
         return rows > 0;
     }
 
     public boolean deleteUser(long userId) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        int rows = db.delete("users", "id = ?", new String[]{String.valueOf(userId)});
-        if (rows > 0) auditRepo.log("USER_DELETE", null, String.valueOf(userId), "deleted");
+        int rows = db.delete("users", "id = ?", new String[] { String.valueOf(userId) });
+        if (rows > 0)
+            auditRepo.log("USER_DELETE", null, String.valueOf(userId), "deleted");
         return rows > 0;
     }
 
@@ -123,6 +127,7 @@ public class UserRepository {
         cv.put("mssv", u.getMssv());
         cv.put("name", u.getName());
         cv.put("role", u.getRole());
+        cv.put("plain_password", password);
         try {
             cv.put("password_hash", HashUtil.hashPassword(password));
         } catch (Exception e) {
@@ -130,7 +135,8 @@ public class UserRepository {
         }
         cv.put("created_at", System.currentTimeMillis());
         long id = db.insert("users", null, cv);
-        if (id != -1) auditRepo.log("USER_CREATE", null, String.valueOf(id), u.getName());
+        if (id != -1)
+            auditRepo.log("USER_CREATE", null, String.valueOf(id), u.getName());
         return id;
     }
 
@@ -139,12 +145,14 @@ public class UserRepository {
         ContentValues cv = new ContentValues();
         try {
             cv.put("password_hash", HashUtil.hashPassword(newPassword));
+            cv.put("plain_password", newPassword);
         } catch (Exception e) {
             return false;
         }
         cv.put("password_needs_reset", 0);
-        int rows = db.update("users", cv, "id = ?", new String[]{String.valueOf(userId)});
-        if (rows > 0) auditRepo.log("PASSWORD_CHANGE", userId, null, "changed password");
+        int rows = db.update("users", cv, "id = ?", new String[] { String.valueOf(userId) });
+        if (rows > 0)
+            auditRepo.log("PASSWORD_CHANGE", userId, null, "changed password");
         return rows > 0;
     }
 
@@ -153,12 +161,14 @@ public class UserRepository {
         ContentValues cv = new ContentValues();
         try {
             cv.put("password_hash", HashUtil.hashPassword("123456")); // Reset to default password
+            cv.put("plain_password", "123456");
         } catch (Exception e) {
             return false;
         }
         cv.put("password_needs_reset", 1);
-        int rows = db.update("users", cv, "id = ?", new String[]{String.valueOf(userId)});
-        if (rows > 0) auditRepo.log("PASSWORD_RESET", null, String.valueOf(userId), "password reset");
+        int rows = db.update("users", cv, "id = ?", new String[] { String.valueOf(userId) });
+        if (rows > 0)
+            auditRepo.log("PASSWORD_RESET", null, String.valueOf(userId), "password reset");
         return rows > 0;
     }
 
@@ -192,14 +202,15 @@ public class UserRepository {
 
     public boolean removeStudentFromClass(long userId, long classId) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        return db.delete("class_students", "student_id = ? AND class_id = ?", new String[]{String.valueOf(userId), String.valueOf(classId)}) > 0;
+        return db.delete("class_students", "student_id = ? AND class_id = ?",
+                new String[] { String.valueOf(userId), String.valueOf(classId) }) > 0;
     }
 
     public List<User> getStudentsByClass(long classId) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         List<User> students = new ArrayList<>();
         String query = "SELECT u.* FROM users u INNER JOIN class_students cs ON u.id = cs.student_id WHERE cs.class_id = ?";
-        try (Cursor c = db.rawQuery(query, new String[]{String.valueOf(classId)})) {
+        try (Cursor c = db.rawQuery(query, new String[] { String.valueOf(classId) })) {
             while (c.moveToNext()) {
                 students.add(cursorToUser(c));
             }
@@ -211,7 +222,7 @@ public class UserRepository {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put("token", token);
-        int rows = db.update("users", cv, "id = ?", new String[]{String.valueOf(userId)});
+        int rows = db.update("users", cv, "id = ?", new String[] { String.valueOf(userId) });
         return rows > 0;
     }
 
@@ -234,6 +245,10 @@ public class UserRepository {
         int tokenCol = c.getColumnIndex("token");
         if (tokenCol != -1 && !c.isNull(tokenCol)) {
             user.setToken(c.getString(tokenCol));
+        }
+        int plainPasswordCol = c.getColumnIndex("plain_password");
+        if (plainPasswordCol != -1 && !c.isNull(plainPasswordCol)) {
+            user.setPlainPassword(c.getString(plainPasswordCol));
         }
         return user;
     }

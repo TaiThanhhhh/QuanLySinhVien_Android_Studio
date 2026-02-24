@@ -18,6 +18,7 @@ import com.example.quanlysinhvien.data.model.User;
 import com.example.quanlysinhvien.data.repo.AttendanceRepository;
 import com.example.quanlysinhvien.data.repo.UserRepository;
 import com.example.quanlysinhvien.databinding.FragmentStudentDashboardBinding;
+import com.example.quanlysinhvien.ui.base.ConfirmationDialogFragment;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
@@ -57,9 +58,29 @@ public class StudentDashboardFragment extends Fragment {
         binding.cardViewHistory.setOnClickListener(
                 v -> NavHostFragment.findNavController(this).navigate(R.id.action_student_dashboard_to_history));
 
-        binding.cardFaceEnrollment.setOnClickListener(
-                v -> NavHostFragment.findNavController(this)
-                        .navigate(R.id.action_student_dashboard_to_face_enrollment));
+        binding.cardFaceEnrollment.setOnClickListener(v -> {
+            User user = userRepository.getUserById(sessionManager.getUserId());
+            if (user != null && user.getFaceTemplate() != null && !user.getFaceTemplate().isEmpty()) {
+                ConfirmationDialogFragment dialog = ConfirmationDialogFragment.newInstance(
+                        "Cập nhật khuôn mặt",
+                        "Bạn đã có dữ liệu khuôn mặt. Bạn có muốn chụp lại để cập nhật không?",
+                        R.drawable.ic_student, // Using student icon as requested/appropriate
+                        "Cập nhật",
+                        "Hủy");
+
+                dialog.setOnResultListener(confirmed -> {
+                    if (confirmed) {
+                        NavHostFragment.findNavController(this)
+                                .navigate(R.id.action_student_dashboard_to_face_enrollment);
+                    }
+                });
+
+                dialog.show(getParentFragmentManager(), "UpdateFaceConfirmation");
+            } else {
+                NavHostFragment.findNavController(this)
+                        .navigate(R.id.action_student_dashboard_to_face_enrollment);
+            }
+        });
     }
 
     private void loadUserProfile() {
@@ -69,6 +90,9 @@ public class StudentDashboardFragment extends Fragment {
             if (user != null) {
                 binding.tvStudentName.setText(user.getName());
                 binding.tvStudentId.setText(user.getMssv());
+
+                // Face enrollment card is now always visible as per user request
+                binding.cardFaceEnrollment.setVisibility(View.VISIBLE);
             }
         }
     }

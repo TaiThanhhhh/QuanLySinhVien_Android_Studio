@@ -145,6 +145,10 @@ public class HistoryFragment extends Fragment {
                         statusTextRes = R.string.status_absent;
                         statusColorRes = R.color.status_locked; // Red
                         break;
+                    case "EXCUSED":
+                        statusTextRes = R.string.status_excused;
+                        statusColorRes = R.color.primary; // Blue
+                        break;
                     default:
                         statusTextRes = R.string.status_absent;
                         statusColorRes = R.color.status_locked;

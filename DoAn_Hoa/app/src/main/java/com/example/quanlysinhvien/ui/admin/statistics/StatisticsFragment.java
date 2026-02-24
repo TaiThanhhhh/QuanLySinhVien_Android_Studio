@@ -174,9 +174,9 @@ public class StatisticsFragment extends Fragment {
             int totalPresentAll = 0;
             int totalLateAll = 0;
             int totalAbsentAll = 0;
+            int totalExcusedAll = 0;
 
             ArrayList<Entry> lineEntries = new ArrayList<>();
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM", Locale.getDefault());
             int sessionIndex = 0;
 
             // Sort sessions by time ascending for the line chart
@@ -186,17 +186,22 @@ public class StatisticsFragment extends Fragment {
                 List<StatusCount> counts = attendanceRepository.getAttendanceStatusCounts(session.getId());
                 int sessionPresent = 0;
                 int sessionLate = 0;
+                int sessionExcused = 0;
+
                 for (StatusCount sc : counts) {
                     if ("ON_TIME".equals(sc.getStatus())) {
                         sessionPresent += sc.getCount();
                     } else if ("LATE".equals(sc.getStatus())) {
                         sessionLate += sc.getCount();
+                    } else if ("EXCUSED".equals(sc.getStatus())) {
+                        sessionExcused += sc.getCount();
                     }
                 }
 
                 totalPresentAll += sessionPresent;
                 totalLateAll += sessionLate;
-                totalAbsentAll += Math.max(0, enrolledCount - (sessionPresent + sessionLate));
+                totalExcusedAll += sessionExcused;
+                totalAbsentAll += Math.max(0, enrolledCount - (sessionPresent + sessionLate + sessionExcused));
 
                 // Attendance rate for this specific session
                 float sessionRate = enrolledCount > 0 ? (float) (sessionPresent + sessionLate) * 100f / enrolledCount
@@ -212,7 +217,7 @@ public class StatisticsFragment extends Fragment {
             }
 
             // Pie Chart: Cumulative Distribution
-            loadPieChartAggregated(totalPresentAll, totalLateAll, totalAbsentAll);
+            loadPieChartAggregated(totalPresentAll, totalLateAll, totalAbsentAll, totalExcusedAll);
 
             // Line Chart: Rate Trend
             loadLineChartTrend(lineEntries);
@@ -226,7 +231,7 @@ public class StatisticsFragment extends Fragment {
         }
     }
 
-    private void loadPieChartAggregated(int onTime, int late, int absent) {
+    private void loadPieChartAggregated(int onTime, int late, int absent, int excused) {
         ArrayList<PieEntry> entries = new ArrayList<>();
         if (onTime > 0)
             entries.add(new PieEntry(onTime, "Đúng giờ"));
@@ -234,9 +239,16 @@ public class StatisticsFragment extends Fragment {
             entries.add(new PieEntry(late, "Đi muộn"));
         if (absent > 0)
             entries.add(new PieEntry(absent, "Vắng"));
+        if (excused > 0)
+            entries.add(new PieEntry(excused, "Vắng (có phép)"));
 
         PieDataSet dataSet = new PieDataSet(entries, "");
-        dataSet.setColors(ColorTemplate.MATERIAL_COLORS);
+        List<Integer> colors = new ArrayList<>();
+        colors.add(Color.parseColor("#4CAF50")); // Green for on time
+        colors.add(Color.parseColor("#FFC107")); // Amber for late
+        colors.add(Color.parseColor("#F44336")); // Red for absent
+        colors.add(Color.parseColor("#2196F3")); // Blue for excused
+        dataSet.setColors(colors);
         dataSet.setValueTextSize(14f);
         dataSet.setValueTextColor(Color.BLACK);
 
@@ -402,10 +414,14 @@ public class StatisticsFragment extends Fragment {
                         displayStatus = "ĐI MUỘN";
                     else if ("ABSENT".equals(status))
                         displayStatus = "VẮNG";
+                    else if ("EXCUSED".equals(status))
+                        displayStatus = "VẮNG (CÓ PHÉP)";
 
                     PdfPCell statusCell = createCell(displayStatus, normalFont, Element.ALIGN_CENTER);
                     if ("ABSENT".equals(status)) {
                         statusCell.setBackgroundColor(new BaseColor(255, 230, 230)); // Light red for absent
+                    } else if ("EXCUSED".equals(status)) {
+                        statusCell.setBackgroundColor(new BaseColor(230, 242, 255)); // Light blue for excused
                     }
                     table.addCell(statusCell);
                 }

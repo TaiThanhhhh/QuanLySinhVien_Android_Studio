@@ -10,13 +10,15 @@ public class User implements Parcelable {
     private String role;
     private String passwordHash;
     private boolean passwordNeedsReset;
+    private String plainPassword;
     private String deviceId;
     private String faceTemplate;
     private String token;
     private long createdAt;
     private Long updatedAt;
 
-    public User() {}
+    public User() {
+    }
 
     protected User(Parcel in) {
         id = in.readLong();
@@ -74,36 +76,99 @@ public class User implements Parcelable {
     };
 
     // Getters and Setters
-    public long getId() { return id; }
-    public void setId(long id) { this.id = id; }
+    public long getId() {
+        return id;
+    }
 
-    public String getMssv() { return mssv; }
-    public void setMssv(String mssv) { this.mssv = mssv; }
+    public void setId(long id) {
+        this.id = id;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public String getMssv() {
+        return mssv;
+    }
 
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
+    public void setMssv(String mssv) {
+        this.mssv = mssv;
+    }
 
-    public String getPasswordHash() { return passwordHash; }
-    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
+    public String getName() {
+        return name;
+    }
 
-    public boolean isPasswordNeedsReset() { return passwordNeedsReset; }
-    public void setPasswordNeedsReset(boolean passwordNeedsReset) { this.passwordNeedsReset = passwordNeedsReset; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public String getDeviceId() { return deviceId; }
-    public void setDeviceId(String deviceId) { this.deviceId = deviceId; }
+    public String getRole() {
+        return role;
+    }
 
-    public String getFaceTemplate() { return faceTemplate; }
-    public void setFaceTemplate(String faceTemplate) { this.faceTemplate = faceTemplate; }
+    public void setRole(String role) {
+        this.role = role;
+    }
 
-    public String getToken() { return token; }
-    public void setToken(String token) { this.token = token; }
+    public String getPasswordHash() {
+        return passwordHash;
+    }
 
-    public long getCreatedAt() { return createdAt; }
-    public void setCreatedAt(long createdAt) { this.createdAt = createdAt; }
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
 
-    public Long getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(Long updatedAt) { this.updatedAt = updatedAt; }
+    public boolean isPasswordNeedsReset() {
+        return passwordNeedsReset;
+    }
+
+    public void setPasswordNeedsReset(boolean passwordNeedsReset) {
+        this.passwordNeedsReset = passwordNeedsReset;
+    }
+
+    public String getPlainPassword() {
+        return plainPassword;
+    }
+
+    public void setPlainPassword(String plainPassword) {
+        this.plainPassword = plainPassword;
+    }
+
+    public String getDeviceId() {
+        return deviceId;
+    }
+
+    public void setDeviceId(String deviceId) {
+        this.deviceId = deviceId;
+    }
+
+    public String getFaceTemplate() {
+        return faceTemplate;
+    }
+
+    public void setFaceTemplate(String faceTemplate) {
+        this.faceTemplate = faceTemplate;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public long getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(long createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Long getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Long updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }

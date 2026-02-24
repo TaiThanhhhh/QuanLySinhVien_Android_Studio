@@ -120,6 +120,7 @@
     <string name="status_on_time">Đúng giờ</string>
     <string name="status_late">Đi muộn</string>
     <string name="status_absent">Vắng</string>
+    <string name="status_excused">Vắng ( có phép )</string>
 
     <!-- Common App Strings -->
     <string name="nav_logout">Đăng xuất</string>

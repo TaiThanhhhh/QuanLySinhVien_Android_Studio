@@ -38,7 +38,8 @@ public class AttendanceManagementAdapter extends ListAdapter<AttendanceStatus, A
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        GridItemAttendanceManagementBinding binding = GridItemAttendanceManagementBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
+        GridItemAttendanceManagementBinding binding = GridItemAttendanceManagementBinding
+                .inflate(LayoutInflater.from(parent.getContext()), parent, false);
         return new ViewHolder(binding);
     }
 
@@ -72,6 +73,10 @@ public class AttendanceManagementAdapter extends ListAdapter<AttendanceStatus, A
                 case "LATE":
                     statusTextRes = R.string.status_late;
                     statusColorRes = R.color.status_upcoming; // Using upcoming for orange
+                    break;
+                case "EXCUSED":
+                    statusTextRes = R.string.status_excused;
+                    statusColorRes = R.color.primary; // Or any other distinct color
                     break;
                 default: // ABSENT
                     statusTextRes = R.string.status_absent;

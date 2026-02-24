@@ -82,6 +82,10 @@ public class MainActivity extends AppCompatActivity {
         // Intercept all navigation item clicks ourselves for full control
         navigationView.setNavigationItemSelectedListener(this::onNavigationItemSelected);
         updateNavHeader(navigationView);
+
+        if (getIntent().getBooleanExtra("START_FACE_ENROLL", false)) {
+            navController.navigate(R.id.nav_face_enrollment);
+        }
     }
 
     private void updateNavHeader(NavigationView navigationView) {

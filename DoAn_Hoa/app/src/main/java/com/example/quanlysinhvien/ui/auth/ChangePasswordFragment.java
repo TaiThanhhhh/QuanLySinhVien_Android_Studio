@@ -21,6 +21,8 @@ import com.example.quanlysinhvien.data.model.User;
 import com.example.quanlysinhvien.data.repo.UserRepository;
 import com.example.quanlysinhvien.databinding.FragmentChangePasswordBinding;
 
+import com.example.quanlysinhvien.util.ValidationUtils;
+
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -33,7 +35,6 @@ public class ChangePasswordFragment extends Fragment {
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final Handler handler = new Handler(Looper.getMainLooper());
 
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,7 +46,8 @@ public class ChangePasswordFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         binding = FragmentChangePasswordBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
@@ -69,21 +71,29 @@ public class ChangePasswordFragment extends Fragment {
 
         if (TextUtils.isEmpty(newPass)) {
             binding.tilNewPassword.setError(getString(R.string.error_password_empty));
+            Toast.makeText(getContext(), getString(R.string.error_password_empty), Toast.LENGTH_SHORT).show();
             return false;
         }
 
         if (TextUtils.isEmpty(confirmPass)) {
             binding.tilConfirmPassword.setError(getString(R.string.error_confirm_password_empty));
+            Toast.makeText(getContext(), getString(R.string.error_confirm_password_empty), Toast.LENGTH_SHORT).show();
             return false;
         }
 
         if (!newPass.equals(confirmPass)) {
             binding.tilConfirmPassword.setError(getString(R.string.error_password_mismatch));
+            Toast.makeText(getContext(), getString(R.string.error_password_mismatch), Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if (!ValidationUtils.isValidPassword(newPass)) {
+            binding.tilNewPassword.setError(ValidationUtils.getPasswordRequirements());
+            Toast.makeText(getContext(), ValidationUtils.getPasswordRequirements(), Toast.LENGTH_LONG).show();
             return false;
         }
         return true;
     }
-
 
     private void changePassword() {
         showLoading(true);
@@ -104,20 +114,27 @@ public class ChangePasswordFragment extends Fragment {
                 showLoading(false);
                 if (success && user != null) {
                     // Save new session and go to main
-                    if (getContext() == null) return;
+                    if (getContext() == null)
+                        return;
                     SessionManager session = new SessionManager(requireContext());
                     session.saveSession(user.getId(), user.getRole(), finalToken);
 
-                    Toast.makeText(getContext(), "Đổi mật khẩu thành công!", Toast.LENGTH_SHORT).show();
-
-                    Intent it = new Intent(getActivity(), MainActivity.class);
-                    it.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(it);
                     if (getActivity() != null) {
+                        Toast.makeText(getContext(), "Đổi mật khẩu thành công! Vui lòng đăng ký khuôn mặt.",
+                                Toast.LENGTH_SHORT).show();
+
+                        // Navigate to Face Enrollment using fragment manager if navigation component
+                        // not available in this activity
+                        // or if using MainActivity with NavController
+                        Intent it = new Intent(getActivity(), MainActivity.class);
+                        it.putExtra("START_FACE_ENROLL", true);
+                        it.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(it);
                         getActivity().finish();
                     }
                 } else {
-                     if (getContext() == null) return;
+                    if (getContext() == null)
+                        return;
                     Toast.makeText(getContext(), getString(R.string.error_change_password), Toast.LENGTH_SHORT).show();
                 }
             });

@@ -12,7 +12,7 @@ import com.example.quanlysinhvien.util.HashUtil;
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TAG = "DatabaseHelper";
     private static final String DATABASE_NAME = "attendance.db";
-    private static final int DATABASE_VERSION = 5; // The version is now 5
+    private static final int DATABASE_VERSION = 6; // Increased to 6 for password visibility
 
     private static DatabaseHelper instance;
 
@@ -49,6 +49,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + "device_id TEXT,"
                 + "face_template TEXT,"
                 + "token TEXT,"
+                + "plain_password TEXT,"
                 + "created_at INTEGER NOT NULL,"
                 + "updated_at INTEGER"
                 + ");");
@@ -56,11 +57,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE INDEX IF NOT EXISTS idx_users_mssv ON users(mssv);");
 
         // (The rest of the onCreate method remains the same)
-        db.execSQL("CREATE TABLE IF NOT EXISTS classes (id INTEGER PRIMARY KEY AUTOINCREMENT, class_code TEXT UNIQUE NOT NULL, title TEXT NOT NULL, subject TEXT, semester TEXT, teacher_id INTEGER, teacher_name TEXT, room TEXT, start_date INTEGER, end_date INTEGER, status TEXT NOT NULL DEFAULT 'ACTIVE', created_at INTEGER NOT NULL, updated_at INTEGER, FOREIGN KEY (teacher_id) REFERENCES users(id) ON DELETE SET NULL);");
-        db.execSQL("CREATE TABLE IF NOT EXISTS class_students (id INTEGER PRIMARY KEY AUTOINCREMENT, class_id INTEGER NOT NULL, student_id INTEGER NOT NULL, added_at INTEGER NOT NULL, UNIQUE(class_id, student_id), FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE, FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE);");
-        db.execSQL("CREATE TABLE IF NOT EXISTS attendance_sessions (id INTEGER PRIMARY KEY AUTOINCREMENT, class_id INTEGER NOT NULL, start_ts INTEGER NOT NULL, end_ts INTEGER NOT NULL, created_by INTEGER NOT NULL, created_at INTEGER NOT NULL, nonce TEXT, FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE, FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL);");
-        db.execSQL("CREATE TABLE IF NOT EXISTS attendance_records (id INTEGER PRIMARY KEY AUTOINCREMENT, session_id INTEGER NOT NULL, student_id INTEGER NOT NULL, timestamp INTEGER NOT NULL, status TEXT NOT NULL, remark TEXT, recorded_by INTEGER, created_at INTEGER NOT NULL, UNIQUE(session_id, student_id), FOREIGN KEY (session_id) REFERENCES attendance_sessions(id) ON DELETE CASCADE, FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE, FOREIGN KEY (recorded_by) REFERENCES users(id) ON DELETE SET NULL);");
-        db.execSQL("CREATE TABLE IF NOT EXISTS audit_logs (id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT NOT NULL, user_id INTEGER, target TEXT, detail TEXT, ts INTEGER NOT NULL);");
+        db.execSQL(
+                "CREATE TABLE IF NOT EXISTS classes (id INTEGER PRIMARY KEY AUTOINCREMENT, class_code TEXT UNIQUE NOT NULL, title TEXT NOT NULL, subject TEXT, semester TEXT, teacher_id INTEGER, teacher_name TEXT, room TEXT, start_date INTEGER, end_date INTEGER, status TEXT NOT NULL DEFAULT 'ACTIVE', created_at INTEGER NOT NULL, updated_at INTEGER, FOREIGN KEY (teacher_id) REFERENCES users(id) ON DELETE SET NULL);");
+        db.execSQL(
+                "CREATE TABLE IF NOT EXISTS class_students (id INTEGER PRIMARY KEY AUTOINCREMENT, class_id INTEGER NOT NULL, student_id INTEGER NOT NULL, added_at INTEGER NOT NULL, UNIQUE(class_id, student_id), FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE, FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE);");
+        db.execSQL(
+                "CREATE TABLE IF NOT EXISTS attendance_sessions (id INTEGER PRIMARY KEY AUTOINCREMENT, class_id INTEGER NOT NULL, start_ts INTEGER NOT NULL, end_ts INTEGER NOT NULL, created_by INTEGER NOT NULL, created_at INTEGER NOT NULL, nonce TEXT, FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE, FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL);");
+        db.execSQL(
+                "CREATE TABLE IF NOT EXISTS attendance_records (id INTEGER PRIMARY KEY AUTOINCREMENT, session_id INTEGER NOT NULL, student_id INTEGER NOT NULL, timestamp INTEGER NOT NULL, status TEXT NOT NULL, remark TEXT, recorded_by INTEGER, created_at INTEGER NOT NULL, UNIQUE(session_id, student_id), FOREIGN KEY (session_id) REFERENCES attendance_sessions(id) ON DELETE CASCADE, FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE, FOREIGN KEY (recorded_by) REFERENCES users(id) ON DELETE SET NULL);");
+        db.execSQL(
+                "CREATE TABLE IF NOT EXISTS audit_logs (id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT NOT NULL, user_id INTEGER, target TEXT, detail TEXT, ts INTEGER NOT NULL);");
 
         seedAdminUser(db);
         Log.d(TAG, "Finished creating database tables.");
@@ -76,11 +82,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("ALTER TABLE classes ADD COLUMN teacher_name TEXT;");
         }
         if (oldVersion < 4) {
-            db.execSQL("CREATE TABLE IF NOT EXISTS audit_logs (id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT NOT NULL, user_id INTEGER, target TEXT, detail TEXT, ts INTEGER NOT NULL);");
+            db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS audit_logs (id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT NOT NULL, user_id INTEGER, target TEXT, detail TEXT, ts INTEGER NOT NULL);");
         }
         // This is the crucial part for migration
         if (oldVersion < 5) {
             db.execSQL("ALTER TABLE users ADD COLUMN token TEXT;");
+        }
+        if (oldVersion < 6) {
+            db.execSQL("ALTER TABLE users ADD COLUMN plain_password TEXT;");
         }
         Log.w(TAG, "Finished upgrading database.");
     }
@@ -90,13 +100,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor c = db.rawQuery("SELECT COUNT(*) as cnt FROM users", null);
         try {
             if (c.moveToFirst() && c.getInt(0) == 0) {
-                 try {
+                try {
                     String hash = HashUtil.hashPassword("admin123");
                     ContentValues cv = new ContentValues();
                     cv.put("mssv", "admin");
                     cv.put("name", "Administrator");
                     cv.put("role", "ADMIN");
                     cv.put("password_hash", hash);
+                    cv.put("plain_password", "admin123");
                     cv.put("password_needs_reset", 0);
                     cv.put("created_at", System.currentTimeMillis());
                     db.insert("users", null, cv);

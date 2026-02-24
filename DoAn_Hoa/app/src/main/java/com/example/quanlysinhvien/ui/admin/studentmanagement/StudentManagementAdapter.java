@@ -2,6 +2,7 @@ package com.example.quanlysinhvien.ui.admin.studentmanagement;
 
 import android.graphics.Color;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -63,12 +64,13 @@ public class StudentManagementAdapter extends ListAdapter<User, StudentManagemen
             binding.tvStudentName.setText(student.getName());
             binding.tvStudentId.setText(student.getMssv());
             if (student.isPasswordNeedsReset()) {
-                binding.tvPasswordStatus.setText("Chưa đổi mật khẩu");
-                binding.tvPasswordStatus.setTextColor(Color.RED);
+                binding.tvStudentPassword.setText("Chưa đổi mật khẩu");
+                binding.tvStudentPassword.setTextColor(Color.RED);
             } else {
-                binding.tvPasswordStatus.setText("Đã đổi mật khẩu");
-                binding.tvPasswordStatus.setTextColor(Color.GREEN);
+                binding.tvStudentPassword.setText("Đã đổi mật khẩu");
+                binding.tvStudentPassword.setTextColor(Color.parseColor("#4CAF50")); // Green
             }
+            binding.tvStudentPassword.setVisibility(View.VISIBLE);
             binding.btnEditStudent.setOnClickListener(v -> onEdit.accept(student));
             binding.btnDeleteStudent.setOnClickListener(v -> onDelete.accept(student));
         }

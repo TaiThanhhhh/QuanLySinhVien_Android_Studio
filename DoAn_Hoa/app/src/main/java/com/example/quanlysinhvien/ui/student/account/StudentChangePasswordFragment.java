@@ -17,6 +17,7 @@ import com.example.quanlysinhvien.R;
 import com.example.quanlysinhvien.auth.SessionManager;
 import com.example.quanlysinhvien.data.model.User;
 import com.example.quanlysinhvien.data.repo.UserRepository;
+import com.example.quanlysinhvien.util.ValidationUtils;
 import com.google.android.material.textfield.TextInputEditText;
 
 public class StudentChangePasswordFragment extends Fragment {
@@ -35,7 +36,8 @@ public class StudentChangePasswordFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_student_change_password, container, false);
     }
 
@@ -63,11 +65,13 @@ public class StudentChangePasswordFragment extends Fragment {
 
         if (!newPass.equals(confirmPass)) {
             etConfirmPassword.setError("Mật khẩu xác nhận không khớp");
+            Toast.makeText(getContext(), "Mật khẩu xác nhận không khớp", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        if (newPass.length() < 6) {
-            etNewPassword.setError("Mật khẩu mới phải có ít nhất 6 ký tự");
+        if (!ValidationUtils.isValidPassword(newPass)) {
+            etNewPassword.setError(ValidationUtils.getPasswordRequirements());
+            Toast.makeText(getContext(), ValidationUtils.getPasswordRequirements(), Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -81,6 +85,7 @@ public class StudentChangePasswordFragment extends Fragment {
 
         if (!userRepository.verifyPassword(currentUser, oldPass)) {
             etOldPassword.setError("Mật khẩu cũ không đúng");
+            Toast.makeText(getContext(), "Mật khẩu cũ không đúng", Toast.LENGTH_SHORT).show();
             return;
         }
 

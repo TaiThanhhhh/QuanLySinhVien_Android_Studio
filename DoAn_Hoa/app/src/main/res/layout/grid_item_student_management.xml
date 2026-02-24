@@ -32,13 +32,15 @@
             tools:text="2050531200123" />
 
         <TextView
-            android:id="@+id/tv_password_status"
+            android:id="@+id/tv_student_password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="2dp"
             android:gravity="center_horizontal"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
-            tools:text="Password Changed" />
+            android:textColor="@color/primary"
+            android:textStyle="italic"
+            tools:text="Đã đổi mật khẩu" />
 
         <LinearLayout
             android:layout_width="match_parent"
