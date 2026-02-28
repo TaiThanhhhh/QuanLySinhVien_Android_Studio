@@ -41,7 +41,8 @@ public class LoginFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         binding = FragmentLoginBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
@@ -82,12 +83,14 @@ public class LoginFragment extends Fragment {
         String pass = binding.etPassword.getText().toString();
 
         executor.execute(() -> {
-            String androidId = Settings.Secure.getString(requireContext().getContentResolver(), Settings.Secure.ANDROID_ID);
-            //String androidId = "MY_TEST_DEVICE_ID_001";
+            String androidId = Settings.Secure.getString(requireContext().getContentResolver(),
+                    Settings.Secure.ANDROID_ID);
+            // String androidId = "MY_TEST_DEVICE_ID_001";
             AuthResult res = authService.login(mssv, pass, androidId);
 
             handler.post(() -> {
-                if (getContext() == null) return; // Fragment is not attached
+                if (getContext() == null)
+                    return; // Fragment is not attached
                 setLoading(false);
 
                 switch (res.getStatus()) {
@@ -95,6 +98,7 @@ public class LoginFragment extends Fragment {
                         User user = res.getUser();
                         SessionManager session = new SessionManager(requireContext());
                         session.saveSession(user.getId(), user.getRole(), res.getToken());
+                        Toast.makeText(getContext(), "Đăng nhập thành công", Toast.LENGTH_SHORT).show();
                         goToMainActivity();
                         break;
                     case NEEDS_PASSWORD_RESET:
@@ -103,11 +107,13 @@ public class LoginFragment extends Fragment {
                         NavHostFragment.findNavController(this).navigate(R.id.action_login_to_changePassword, bundle);
                         break;
                     case DEVICE_MISMATCH:
-                        Toast.makeText(getContext(), "Tài khoản đã được liên kết với thiết bị khác.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getContext(), "Tài khoản đã được liên kết với thiết bị khác.", Toast.LENGTH_LONG)
+                                .show();
                         break;
                     default:
                         binding.tilPassword.setError(getString(R.string.login_error_invalid_credentials));
-                        Toast.makeText(getContext(), getString(R.string.login_error_invalid_credentials), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), getString(R.string.login_error_invalid_credentials),
+                                Toast.LENGTH_SHORT).show();
                         break;
                 }
             });
@@ -115,7 +121,8 @@ public class LoginFragment extends Fragment {
     }
 
     private void goToMainActivity() {
-        if (getActivity() == null) return;
+        if (getActivity() == null)
+            return;
         Intent it = new Intent(getActivity(), MainActivity.class);
         it.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(it);

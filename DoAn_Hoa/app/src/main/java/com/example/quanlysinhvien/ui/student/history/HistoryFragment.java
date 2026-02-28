@@ -66,6 +66,14 @@ public class HistoryFragment extends Fragment {
         long studentId = sessionManager.getUserId();
         List<AttendanceRecord> updatedHistory = attendanceRepository.getAttendanceHistoryForStudent(studentId);
         adapter.updateData(updatedHistory);
+
+        if (updatedHistory == null || updatedHistory.isEmpty()) {
+            binding.tvEmptyHistory.setVisibility(View.VISIBLE);
+            binding.rvHistory.setVisibility(View.GONE);
+        } else {
+            binding.tvEmptyHistory.setVisibility(View.GONE);
+            binding.rvHistory.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override

@@ -14,6 +14,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:text="Thêm sinh viên đã chọn"/>
+        android:text="Thêm/Sửa sinh viên đã chọn"/>
 
 </RelativeLayout>

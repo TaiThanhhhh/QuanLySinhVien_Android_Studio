@@ -240,7 +240,7 @@
 
                     <TextView
                         style="@style/ActionCardText"
-                        android:text="Sinh viên" />
+                        android:text="Xem sinh viên" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

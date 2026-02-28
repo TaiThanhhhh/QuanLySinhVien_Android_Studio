@@ -52,7 +52,7 @@
     <string name="hint_start_date">Ngày bắt đầu</string>
     <string name="hint_end_date">Ngày kết thúc</string>
     <string name="btn_create_class">Tạo lớp học</string>
-    <string name="btn_add_student">Thêm sinh viên</string>
+    <string name="btn_add_student">Thêm/Sửa sinh viên</string>
     <string name="title_student_list">Danh sách sinh viên</string>
     <string name="title_attendance_ratio">Tỷ lệ Có mặt / Vắng mặt</string>
     <string name="title_attendance_timeline">Số sinh viên điểm danh theo thời gian</string>

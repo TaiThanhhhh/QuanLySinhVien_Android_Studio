@@ -147,6 +147,7 @@ public class AddEditStudentFragment extends Fragment {
         }
         // Update ViewModel directly — no FragmentResult needed
         viewModel.setStudentList(selectedStudents);
+        Toast.makeText(getContext(), "Đã thêm sinh viên thành công", Toast.LENGTH_SHORT).show();
         NavHostFragment.findNavController(this).popBackStack();
     }
 

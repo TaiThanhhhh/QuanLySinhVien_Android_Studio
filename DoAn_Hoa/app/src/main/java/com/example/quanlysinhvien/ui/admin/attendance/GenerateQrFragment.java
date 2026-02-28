@@ -23,8 +23,11 @@ import androidx.fragment.app.Fragment;
 import com.example.quanlysinhvien.R;
 import com.example.quanlysinhvien.auth.SessionManager;
 import com.example.quanlysinhvien.data.repo.AttendanceSessionRepository;
+import com.google.android.gms.location.CurrentLocationRequest;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
+import com.google.android.gms.tasks.CancellationTokenSource;
 import com.google.zxing.BarcodeFormat;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
@@ -41,6 +44,7 @@ public class GenerateQrFragment extends Fragment {
 
     private ImageView ivQrCode;
     private TextView tvCountdown;
+    private android.widget.ProgressBar pbLoading;
 
     private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
             new ActivityResultContracts.RequestPermission(),
@@ -48,10 +52,10 @@ public class GenerateQrFragment extends Fragment {
                 if (isGranted) {
                     generateAndShowQrCode();
                 } else {
-                    Toast.makeText(getContext(), "Cần cấp quyền truy cập vị trí để tạo mã QR", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "Cần cấp quyền truy cập vị trí để tạo mã QR", Toast.LENGTH_LONG)
+                            .show();
                 }
-            }
-    );
+            });
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -66,7 +70,8 @@ public class GenerateQrFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_generate_qr, container, false);
     }
 
@@ -76,12 +81,14 @@ public class GenerateQrFragment extends Fragment {
 
         ivQrCode = view.findViewById(R.id.iv_qr_code);
         tvCountdown = view.findViewById(R.id.tv_countdown);
+        pbLoading = view.findViewById(R.id.pb_loading);
 
         checkPermissionAndGenerateQr();
     }
 
     private void checkPermissionAndGenerateQr() {
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             generateAndShowQrCode();
         } else {
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
@@ -89,38 +96,60 @@ public class GenerateQrFragment extends Fragment {
     }
 
     private void generateAndShowQrCode() {
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) return;
+        if (ContextCompat.checkSelfPermission(requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+            return;
 
-        fusedLocationClient.getLastLocation().addOnSuccessListener(requireActivity(), location -> {
-            if (location != null) {
-                long userId = sessionManager.getUserId();
-                long sessionId = attendanceSessionRepository.createSession(classId, userId);
+        pbLoading.setVisibility(View.VISIBLE);
+        ivQrCode.setVisibility(View.GONE);
 
-                if (sessionId == -1) {
-                    Toast.makeText(getContext(), "Không thể tạo buổi điểm danh", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+        // Try to get current location with high accuracy
+        CurrentLocationRequest locationRequest = new CurrentLocationRequest.Builder()
+                .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
+                .build();
+        CancellationTokenSource cts = new CancellationTokenSource();
 
-                try {
-                    JSONObject qrContent = new JSONObject();
-                    qrContent.put("sessionId", sessionId);
-                    qrContent.put("classId", classId);
-                    qrContent.put("startTime", System.currentTimeMillis());
-                    qrContent.put("latitude", location.getLatitude());
-                    qrContent.put("longitude", location.getLongitude());
+        fusedLocationClient.getCurrentLocation(locationRequest, cts.getToken())
+                .addOnSuccessListener(requireActivity(), location -> {
+                    pbLoading.setVisibility(View.GONE);
+                    ivQrCode.setVisibility(View.VISIBLE);
 
-                    BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
-                    Bitmap bitmap = barcodeEncoder.encodeBitmap(qrContent.toString(), BarcodeFormat.QR_CODE, 400, 400);
-                    ivQrCode.setImageBitmap(bitmap);
+                    if (location != null) {
+                        long userId = sessionManager.getUserId();
+                        long sessionId = attendanceSessionRepository.createSession(classId, userId);
 
-                    startCountdown();
-                } catch (Exception e) {
-                    Toast.makeText(getContext(), "Lỗi tạo mã QR", Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                Toast.makeText(getContext(), "Không thể lấy được vị trí. Vui lòng bật GPS.", Toast.LENGTH_LONG).show();
-            }
-        });
+                        if (sessionId == -1) {
+                            Toast.makeText(getContext(), "Không thể tạo buổi điểm danh", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        try {
+                            JSONObject qrContent = new JSONObject();
+                            qrContent.put("sessionId", sessionId);
+                            qrContent.put("classId", classId);
+                            qrContent.put("startTime", System.currentTimeMillis());
+                            qrContent.put("latitude", location.getLatitude());
+                            qrContent.put("longitude", location.getLongitude());
+
+                            BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
+                            Bitmap bitmap = barcodeEncoder.encodeBitmap(qrContent.toString(), BarcodeFormat.QR_CODE,
+                                    400, 400);
+                            ivQrCode.setImageBitmap(bitmap);
+
+                            startCountdown();
+                        } catch (Exception e) {
+                            Toast.makeText(getContext(), "Lỗi tạo mã QR", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(getContext(),
+                                "Không thể lấy được vị trí. Vui lòng bật GPS và đảm bảo bạn đang ở nơi có sóng tốt.",
+                                Toast.LENGTH_LONG).show();
+                    }
+                }).addOnFailureListener(requireActivity(), e -> {
+                    pbLoading.setVisibility(View.GONE);
+                    ivQrCode.setVisibility(View.VISIBLE);
+                    Toast.makeText(getContext(), "Lỗi khi lấy vị trí: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void startCountdown() {
@@ -128,11 +157,14 @@ public class GenerateQrFragment extends Fragment {
             public void onTick(long millisUntilFinished) {
                 long minutes = (millisUntilFinished / 1000) / 60;
                 long seconds = (millisUntilFinished / 1000) % 60;
-                tvCountdown.setText(String.format(Locale.getDefault(), "Mã QR sẽ hết hạn trong: %02d:%02d", minutes, seconds));
+                tvCountdown.setText(
+                        String.format(Locale.getDefault(), "Mã QR sẽ hết hạn trong: %02d:%02d", minutes, seconds));
             }
+
             public void onFinish() {
                 tvCountdown.setText("Mã QR đã hết hạn");
-                if(isAdded()) ivQrCode.setImageAlpha(100);
+                if (isAdded())
+                    ivQrCode.setImageAlpha(100);
             }
         }.start();
     }

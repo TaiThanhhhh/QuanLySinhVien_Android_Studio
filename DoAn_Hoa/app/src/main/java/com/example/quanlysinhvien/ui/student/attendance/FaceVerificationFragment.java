@@ -56,7 +56,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@ExperimentalGetImage public class FaceVerificationFragment extends Fragment {
+@ExperimentalGetImage
+public class FaceVerificationFragment extends Fragment {
     private static final String TAG = "FaceVerification";
     private static final double SIMILARITY_THRESHOLD = 0.8; // For landmarks
     private static final double EMBEDDING_COSINE_THRESHOLD = 0.75; // tuned for ArcFace-like models
@@ -93,8 +94,7 @@ import java.util.concurrent.atomic.AtomicInteger;
                 } else {
                     Toast.makeText(getContext(), R.string.permission_needed_camera, Toast.LENGTH_LONG).show();
                 }
-            }
-    );
+            });
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -113,7 +113,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_face_verification, container, false);
     }
 
@@ -154,7 +155,8 @@ import java.util.concurrent.atomic.AtomicInteger;
     }
 
     private void checkCameraPermission() {
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(requireContext(),
+                Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             startCamera();
         } else {
             requestPermissionLauncher.launch(Manifest.permission.CAMERA);
@@ -163,7 +165,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
     @ExperimentalGetImage
     private void startCamera() {
-        // Lazy initialize embedder here to avoid loading TF runtime during fragment creation
+        // Lazy initialize embedder here to avoid loading TF runtime during fragment
+        // creation
         if (embedder == null && FaceUtils.assetExists(requireContext(), MODEL_ASSET)) {
             try {
                 embedder = new FaceEmbedder(requireContext(), MODEL_ASSET, 112, 512);
@@ -173,7 +176,8 @@ import java.util.concurrent.atomic.AtomicInteger;
         }
         buttonsLayout.setVisibility(View.GONE);
         tvStatus.setText(R.string.opening_camera);
-        ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext());
+        ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider
+                .getInstance(requireContext());
 
         cameraProviderFuture.addListener(() -> {
             try {
@@ -189,7 +193,7 @@ import java.util.concurrent.atomic.AtomicInteger;
                 }
 
                 Preview preview = new Preview.Builder().build();
-                
+
                 // Select camera based on availability
                 CameraSelector cameraSelector;
                 boolean hasFrontCamera = false;
@@ -206,7 +210,7 @@ import java.util.concurrent.atomic.AtomicInteger;
                     try {
                         hasBackCamera = cameraProvider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA);
                     } catch (Exception e) {
-                         Log.e(TAG, "Error checking for back camera", e);
+                        Log.e(TAG, "Error checking for back camera", e);
                     }
 
                     if (hasBackCamera) {
@@ -215,13 +219,15 @@ import java.util.concurrent.atomic.AtomicInteger;
                         requireActivity().runOnUiThread(() -> {
                             tvStatus.setText(R.string.status_camera_error);
                             buttonsLayout.setVisibility(View.VISIBLE);
-                            Toast.makeText(getContext(), "Không tìm thấy camera nào trên thiết bị.", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getContext(), "Không tìm thấy camera nào trên thiết bị.", Toast.LENGTH_LONG)
+                                    .show();
                         });
                         return;
                     }
                 }
 
-                ImageAnalysis imageAnalysis = new ImageAnalysis.Builder().setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build();
+                ImageAnalysis imageAnalysis = new ImageAnalysis.Builder()
+                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build();
 
                 FaceDetectorOptions options = new FaceDetectorOptions.Builder()
                         .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
@@ -230,7 +236,10 @@ import java.util.concurrent.atomic.AtomicInteger;
                 FaceDetector detector = FaceDetection.getClient(options);
 
                 imageAnalysis.setAnalyzer(cameraExecutor, image -> {
-                    if (isProcessing.get() || !isAdded()) { image.close(); return; }
+                    if (isProcessing.get() || !isAdded()) {
+                        image.close();
+                        return;
+                    }
                     isProcessing.set(true);
 
                     if (image.getImage() == null) {
@@ -254,24 +263,30 @@ import java.util.concurrent.atomic.AtomicInteger;
 
                                     // First try embedding-based if we have enrolled embedding
                                     try {
-                                        float[] enrolledEmbedding = FaceUtils.extractEmbeddingFromTemplate(enrolledFaceTemplate);
+                                        float[] enrolledEmbedding = FaceUtils
+                                                .extractEmbeddingFromTemplate(enrolledFaceTemplate);
                                         if (enrolledEmbedding != null && embedder != null && embedder.isReady()) {
                                             Bitmap previewBitmap = previewView.getBitmap();
                                             if (previewBitmap != null) {
                                                 android.graphics.Rect bbox = face.getBoundingBox();
-                                                Bitmap faceCrop = FaceUtils.alignCrop(previewBitmap, faces.get(0).getAllLandmarks(), bbox, true, 25);
+                                                Bitmap faceCrop = FaceUtils.alignCrop(previewBitmap,
+                                                        faces.get(0).getAllLandmarks(), bbox, true, 25);
                                                 if (faceCrop != null) {
                                                     float[] probeEmb = embedder.embed(faceCrop);
-                                                    double cosine = FaceEmbedder.cosineSimilarity(enrolledEmbedding, probeEmb);
+                                                    double cosine = FaceEmbedder.cosineSimilarity(enrolledEmbedding,
+                                                            probeEmb);
                                                     Log.d(TAG, "Embedding cosine similarity=" + cosine);
                                                     if (cosine >= EMBEDDING_COSINE_THRESHOLD) {
-                                                        if (cameraProvider != null) cameraProvider.unbindAll();
+                                                        if (cameraProvider != null)
+                                                            cameraProvider.unbindAll();
                                                         recordAttendanceAsSuccess();
                                                     } else {
                                                         // fallback to landmarks-based
                                                         String currentFaceTemplate = currentLandmarksJson;
-                                                        if (currentFaceTemplate != null && compareFaces(enrolledFaceTemplate, currentFaceTemplate)) {
-                                                            if (cameraProvider != null) cameraProvider.unbindAll();
+                                                        if (currentFaceTemplate != null && compareFaces(
+                                                                enrolledFaceTemplate, currentFaceTemplate)) {
+                                                            if (cameraProvider != null)
+                                                                cameraProvider.unbindAll();
                                                             recordAttendanceAsSuccess();
                                                         } else {
                                                             handleVerificationFailure();
@@ -286,8 +301,10 @@ import java.util.concurrent.atomic.AtomicInteger;
                                         } else {
                                             // No enrolled embedding, fallback to landmarks compare
                                             String currentFaceTemplate = currentLandmarksJson;
-                                            if (currentFaceTemplate != null && compareFaces(enrolledFaceTemplate, currentFaceTemplate)) {
-                                                if (cameraProvider != null) cameraProvider.unbindAll();
+                                            if (currentFaceTemplate != null
+                                                    && compareFaces(enrolledFaceTemplate, currentFaceTemplate)) {
+                                                if (cameraProvider != null)
+                                                    cameraProvider.unbindAll();
                                                 recordAttendanceAsSuccess();
                                             } else {
                                                 handleVerificationFailure();
@@ -311,7 +328,7 @@ import java.util.concurrent.atomic.AtomicInteger;
                                 image.close();
                             });
                 });
-                
+
                 final CameraSelector finalSelector = cameraSelector;
                 // Wait for the view to be properly laid out before binding
                 previewView.post(() -> {
@@ -326,7 +343,8 @@ import java.util.concurrent.atomic.AtomicInteger;
                         requireActivity().runOnUiThread(() -> {
                             tvStatus.setText(R.string.status_camera_error);
                             buttonsLayout.setVisibility(android.view.View.VISIBLE);
-                            Toast.makeText(getContext(), "Không thể mở camera: " + be.getMessage(), Toast.LENGTH_LONG).show();
+                            Toast.makeText(getContext(), "Không thể mở camera: " + be.getMessage(), Toast.LENGTH_LONG)
+                                    .show();
                         });
                     }
                 });
@@ -336,7 +354,8 @@ import java.util.concurrent.atomic.AtomicInteger;
                 requireActivity().runOnUiThread(() -> {
                     tvStatus.setText(R.string.status_camera_error);
                     buttonsLayout.setVisibility(android.view.View.VISIBLE);
-                    Toast.makeText(getContext(), "Lỗi khi khởi tạo camera: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "Lỗi khi khởi tạo camera: " + e.getMessage(), Toast.LENGTH_LONG)
+                            .show();
                 });
             }
         }, ContextCompat.getMainExecutor(requireContext()));
@@ -344,11 +363,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
     private void handleVerificationFailure() {
         if (retryCount.incrementAndGet() >= MAX_RETRY_ATTEMPTS) {
-            if (cameraProvider != null) cameraProvider.unbindAll();
+            if (cameraProvider != null)
+                cameraProvider.unbindAll();
             requireActivity().runOnUiThread(() -> {
                 tvStatus.setText(R.string.status_verification_failed);
                 buttonsLayout.setVisibility(View.VISIBLE);
-                Toast.makeText(getContext(), "Không thể nhận dạng khuôn mặt. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Không thể nhận dạng khuôn mặt. Vui lòng thử lại.", Toast.LENGTH_SHORT)
+                        .show();
             });
         }
     }
@@ -359,8 +380,8 @@ import java.util.concurrent.atomic.AtomicInteger;
     }
 
     private void cancelVerification() {
-        Toast.makeText(getContext(), R.string.attendance_canceled, Toast.LENGTH_SHORT).show();
-        NavHostFragment.findNavController(this).popBackStack(R.id.nav_student_home, false);
+        Toast.makeText(getContext(), "Đã hủy xác minh", Toast.LENGTH_SHORT).show();
+        NavHostFragment.findNavController(this).popBackStack();
     }
 
     private boolean compareFaces(String enrolledTemplate, String currentTemplate) throws Exception {
@@ -368,15 +389,18 @@ import java.util.concurrent.atomic.AtomicInteger;
         List<Pair<Integer, PointF>> currentLandmarks = FaceUtils.jsonToTypedLandmarks(currentTemplate);
 
         if (enrolledLandmarks.size() < 5 || currentLandmarks.size() < 5) {
-            Log.d(TAG, "Not enough landmarks: enrolled=" + enrolledLandmarks.size() + ", current=" + currentLandmarks.size());
+            Log.d(TAG, "Not enough landmarks: enrolled=" + enrolledLandmarks.size() + ", current="
+                    + currentLandmarks.size());
             return false;
         }
 
         // Map type -> point for stable matching
         Map<Integer, PointF> enrolledMap = new HashMap<>();
-        for (Pair<Integer, PointF> p : enrolledLandmarks) enrolledMap.put(p.first, p.second);
+        for (Pair<Integer, PointF> p : enrolledLandmarks)
+            enrolledMap.put(p.first, p.second);
         Map<Integer, PointF> currentMap = new HashMap<>();
-        for (Pair<Integer, PointF> p : currentLandmarks) currentMap.put(p.first, p.second);
+        for (Pair<Integer, PointF> p : currentLandmarks)
+            currentMap.put(p.first, p.second);
 
         List<PointF> matchedEnrolled = new ArrayList<>();
         List<PointF> matchedCurrent = new ArrayList<>();
@@ -403,27 +427,35 @@ import java.util.concurrent.atomic.AtomicInteger;
             B[i][1] = matchedCurrent.get(i).y;
         }
 
-        // Compute similarity transform (scale, rotation, translation) from B -> A using Procrustes (Umeyama)
+        // Compute similarity transform (scale, rotation, translation) from B -> A using
+        // Procrustes (Umeyama)
         // Step 1: centroids
-        double[] centroidA = {0.0, 0.0}, centroidB = {0.0, 0.0};
+        double[] centroidA = { 0.0, 0.0 }, centroidB = { 0.0, 0.0 };
         for (int i = 0; i < n; i++) {
-            centroidA[0] += A[i][0]; centroidA[1] += A[i][1];
-            centroidB[0] += B[i][0]; centroidB[1] += B[i][1];
+            centroidA[0] += A[i][0];
+            centroidA[1] += A[i][1];
+            centroidB[0] += B[i][0];
+            centroidB[1] += B[i][1];
         }
-        centroidA[0] /= n; centroidA[1] /= n;
-        centroidB[0] /= n; centroidB[1] /= n;
+        centroidA[0] /= n;
+        centroidA[1] /= n;
+        centroidB[0] /= n;
+        centroidB[1] /= n;
 
         // center the points
         double[][] AA = new double[n][2];
         double[][] BB = new double[n][2];
         for (int i = 0; i < n; i++) {
-            AA[i][0] = A[i][0] - centroidA[0]; AA[i][1] = A[i][1] - centroidA[1];
-            BB[i][0] = B[i][0] - centroidB[0]; BB[i][1] = B[i][1] - centroidB[1];
+            AA[i][0] = A[i][0] - centroidA[0];
+            AA[i][1] = A[i][1] - centroidA[1];
+            BB[i][0] = B[i][0] - centroidB[0];
+            BB[i][1] = B[i][1] - centroidB[1];
         }
 
         // compute variance of BB for scale
         double varB = 0.0;
-        for (int i = 0; i < n; i++) varB += BB[i][0]*BB[i][0] + BB[i][1]*BB[i][1];
+        for (int i = 0; i < n; i++)
+            varB += BB[i][0] * BB[i][0] + BB[i][1] * BB[i][1];
 
         // compute covariance matrix H = BB^T * AA
         double[][] H = new double[2][2];
@@ -435,12 +467,12 @@ import java.util.concurrent.atomic.AtomicInteger;
         }
 
         // SVD of 2x2 H: compute rotation using analytic SVD
-        double det = H[0][0]*H[1][1] - H[0][1]*H[1][0];
+        double det = H[0][0] * H[1][1] - H[0][1] * H[1][0];
         double trace = H[0][0] + H[1][1];
         // compute rotation angle via atan2
         double angle = Math.atan2(H[0][1] - H[1][0], H[0][0] + H[1][1]);
-        double cos = Math.cos(angle/1.0);
-        double sin = Math.sin(angle/1.0);
+        double cos = Math.cos(angle / 1.0);
+        double sin = Math.sin(angle / 1.0);
 
         // compute scale = trace(H^T R) / varB approx = trace / varB
         double scale = (trace) / (varB == 0 ? 1 : varB);
@@ -453,27 +485,32 @@ import java.util.concurrent.atomic.AtomicInteger;
             double yr = scale * (sin * x + cos * y);
             double dx = AA[i][0] - xr;
             double dy = AA[i][1] - yr;
-            sumSq += dx*dx + dy*dy;
+            sumSq += dx * dx + dy * dy;
         }
         double rmse = Math.sqrt(sumSq / n);
 
-        // Normalize by average face size (distance between eyes if present or bbox size approximated)
+        // Normalize by average face size (distance between eyes if present or bbox size
+        // approximated)
         double norm = 0.0;
         // try use eye distance if available
         PointF leftEyeEn = null, rightEyeEn = null;
         for (Pair<Integer, PointF> p : enrolledLandmarks) {
-            if (p.first == com.google.mlkit.vision.face.FaceLandmark.LEFT_EYE) leftEyeEn = p.second;
-            if (p.first == com.google.mlkit.vision.face.FaceLandmark.RIGHT_EYE) rightEyeEn = p.second;
+            if (p.first == com.google.mlkit.vision.face.FaceLandmark.LEFT_EYE)
+                leftEyeEn = p.second;
+            if (p.first == com.google.mlkit.vision.face.FaceLandmark.RIGHT_EYE)
+                rightEyeEn = p.second;
         }
         if (leftEyeEn != null && rightEyeEn != null) {
             norm = Math.hypot(leftEyeEn.x - rightEyeEn.x, leftEyeEn.y - rightEyeEn.y);
         } else {
             // fallback to average distance to centroid
             double avgDist = 0.0;
-            for (PointF p : matchedEnrolled) avgDist += Math.hypot(p.x - (float)centroidA[0], p.y - (float)centroidA[1]);
+            for (PointF p : matchedEnrolled)
+                avgDist += Math.hypot(p.x - (float) centroidA[0], p.y - (float) centroidA[1]);
             norm = avgDist / n;
         }
-        if (norm == 0) norm = 1.0;
+        if (norm == 0)
+            norm = 1.0;
         double normalizedRmse = rmse / norm;
 
         Log.d(TAG, "Procrustes RMSE=" + rmse + " normalized=" + normalizedRmse + " matchedCount=" + n);
@@ -483,7 +520,8 @@ import java.util.concurrent.atomic.AtomicInteger;
     }
 
     private void recordAttendanceAsSuccess() {
-        if (!isAdded()) return;
+        if (!isAdded())
+            return;
 
         long currentTime = System.currentTimeMillis();
         long diffMinutes = (currentTime - startTime) / (60 * 1000);
@@ -500,8 +538,10 @@ import java.util.concurrent.atomic.AtomicInteger;
         long result = attendanceRepository.recordAttendance(attendance);
 
         requireActivity().runOnUiThread(() -> {
-            if(result != -1) {
-                Toast.makeText(getContext(), getString(R.string.attendance_success, status), Toast.LENGTH_LONG).show();
+            if (result != -1) {
+                String statusTranslate = status.equals("ON_TIME") ? "Đúng giờ" : "Đi muộn";
+                Toast.makeText(getContext(), "Điểm danh thành công. Trạng thái: " + statusTranslate, Toast.LENGTH_LONG)
+                        .show();
             } else {
                 Toast.makeText(getContext(), R.string.attendance_failed, Toast.LENGTH_LONG).show();
             }
@@ -512,7 +552,9 @@ import java.util.concurrent.atomic.AtomicInteger;
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (cameraExecutor != null) cameraExecutor.shutdown();
-        if(cameraProvider != null) cameraProvider.unbindAll();
+        if (cameraExecutor != null)
+            cameraExecutor.shutdown();
+        if (cameraProvider != null)
+            cameraProvider.unbindAll();
     }
 }
