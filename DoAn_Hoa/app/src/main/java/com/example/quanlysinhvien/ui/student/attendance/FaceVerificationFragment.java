@@ -545,7 +545,7 @@ public class FaceVerificationFragment extends Fragment {
             } else {
                 Toast.makeText(getContext(), R.string.attendance_failed, Toast.LENGTH_LONG).show();
             }
-            NavHostFragment.findNavController(this).popBackStack(R.id.nav_student_home, false);
+            NavHostFragment.findNavController(this).popBackStack(R.id.nav_student_dashboard, false);
         });
     }
 
