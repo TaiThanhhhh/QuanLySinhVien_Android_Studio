@@ -29,15 +29,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/iv_welcome" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_enroll_face"
-        style="@style/Widget.MaterialComponents.Button"
+    <TextView
+        android:id="@+id/tv_face_management_notice"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
         android:layout_marginBottom="32dp"
-        android:text="@string/student_home_enroll_face"
+        android:gravity="center"
+        android:text="Khuôn mặt điểm danh được quản lý bởi admin. Vui lòng liên hệ quản trị viên nếu cần cập nhật."
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

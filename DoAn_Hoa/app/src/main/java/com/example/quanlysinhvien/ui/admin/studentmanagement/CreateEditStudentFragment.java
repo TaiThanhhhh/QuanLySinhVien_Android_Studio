@@ -27,9 +27,13 @@ public class CreateEditStudentFragment extends Fragment {
     private long studentId = -1;
     private User existingStudent;
 
-    private TextInputEditText etName, etMssv;
+    private TextInputEditText etName;
+    private TextInputEditText etMssv;
     private TextView tvTitle;
-    private Button btnSave, btnResetDevice, btnResetPassword;
+    private Button btnSave;
+    private Button btnResetDevice;
+    private Button btnResetPassword;
+    private Button btnResetFace;
     private LinearLayout adminActionsLayout;
 
     @Override
@@ -43,7 +47,8 @@ public class CreateEditStudentFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_create_edit_student, container, false);
     }
 
@@ -74,12 +79,14 @@ public class CreateEditStudentFragment extends Fragment {
         adminActionsLayout = view.findViewById(R.id.layout_admin_actions);
         btnResetDevice = view.findViewById(R.id.btn_reset_device);
         btnResetPassword = view.findViewById(R.id.btn_reset_password);
+        btnResetFace = view.findViewById(R.id.btn_reset_face);
     }
 
     private void setupClickListeners() {
         btnSave.setOnClickListener(v -> saveStudent());
         btnResetDevice.setOnClickListener(v -> confirmResetDevice());
         btnResetPassword.setOnClickListener(v -> confirmResetPassword());
+        btnResetFace.setOnClickListener(v -> confirmResetFace());
     }
 
     private void loadStudentData() {
@@ -88,13 +95,21 @@ public class CreateEditStudentFragment extends Fragment {
             etName.setText(existingStudent.getName());
             etMssv.setText(existingStudent.getMssv());
             etMssv.setEnabled(false);
+            updateAdminActionState();
         }
+    }
+
+    private void updateAdminActionState() {
+        boolean hasFaceTemplate = existingStudent != null && !TextUtils.isEmpty(existingStudent.getFaceTemplate());
+        btnResetFace.setEnabled(hasFaceTemplate);
     }
 
     private void confirmResetDevice() {
         new AlertDialog.Builder(requireContext())
-                .setTitle("Xác nhận Reset Thiết bị")
-                .setMessage("Bạn có chắc chắn muốn hủy liên kết thiết bị cho sinh viên " + existingStudent.getName() + "? Sinh viên sẽ có thể đăng nhập trên một thiết bị mới.")
+                .setTitle("Xác nhận reset thiết bị")
+                .setMessage("Bạn có chắc chắn muốn hủy liên kết thiết bị cho sinh viên "
+                        + existingStudent.getName()
+                        + "? Sinh viên sẽ có thể đăng nhập trên một thiết bị mới.")
                 .setPositiveButton("Đồng ý", (dialog, which) -> {
                     if (userRepository.resetDeviceBinding(studentId)) {
                         Toast.makeText(getContext(), "Reset thiết bị thành công", Toast.LENGTH_SHORT).show();
@@ -108,13 +123,44 @@ public class CreateEditStudentFragment extends Fragment {
 
     private void confirmResetPassword() {
         new AlertDialog.Builder(requireContext())
-                .setTitle("Xác nhận Reset Mật khẩu")
-                .setMessage("Bạn có chắc chắn muốn đặt lại mật khẩu cho sinh viên " + existingStudent.getName() + "? Mật khẩu sẽ được đặt về mặc định và sinh viên sẽ phải đổi lại ở lần đăng nhập tới.")
+                .setTitle("Xác nhận reset mật khẩu")
+                .setMessage("Bạn có chắc chắn muốn đặt lại mật khẩu cho sinh viên "
+                        + existingStudent.getName()
+                        + "? Mật khẩu sẽ được đặt về mặc định và sinh viên sẽ phải đổi lại ở lần đăng nhập tới.")
                 .setPositiveButton("Đồng ý", (dialog, which) -> {
                     if (userRepository.resetPassword(studentId)) {
                         Toast.makeText(getContext(), "Reset mật khẩu thành công", Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(getContext(), "Reset mật khẩu thất bại", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton("Hủy", null)
+                .show();
+    }
+
+    private void confirmResetFace() {
+        if (existingStudent == null) {
+            return;
+        }
+
+        if (TextUtils.isEmpty(existingStudent.getFaceTemplate())) {
+            Toast.makeText(getContext(), "Sinh viên chưa có dữ liệu khuôn mặt", Toast.LENGTH_SHORT).show();
+            updateAdminActionState();
+            return;
+        }
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Xác nhận reset khuôn mặt")
+                .setMessage("Bạn có chắc chắn muốn xóa dữ liệu khuôn mặt của sinh viên "
+                        + existingStudent.getName()
+                        + "? Sau khi reset, sinh viên sẽ không thể điểm danh khuôn mặt cho đến khi admin cấp lại.")
+                .setPositiveButton("Đồng ý", (dialog, which) -> {
+                    if (userRepository.resetFaceTemplate(studentId)) {
+                        existingStudent.setFaceTemplate(null);
+                        updateAdminActionState();
+                        Toast.makeText(getContext(), "Reset khuôn mặt thành công", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getContext(), "Reset khuôn mặt thất bại", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .setNegativeButton("Hủy", null)
@@ -135,7 +181,7 @@ public class CreateEditStudentFragment extends Fragment {
             return;
         }
 
-        if (studentId != -1) { // Update mode
+        if (studentId != -1) {
             existingStudent.setName(name);
             if (userRepository.updateUser(existingStudent)) {
                 Toast.makeText(getContext(), R.string.success_update_student, Toast.LENGTH_SHORT).show();
@@ -143,12 +189,12 @@ public class CreateEditStudentFragment extends Fragment {
             } else {
                 Toast.makeText(getContext(), R.string.error_update_student, Toast.LENGTH_SHORT).show();
             }
-        } else { // Create mode
+        } else {
             if (userRepository.getUserByMssv(mssv) != null) {
                 etMssv.setError(getString(R.string.error_mssv_exists));
                 return;
             }
-            
+
             User newUser = new User();
             newUser.setName(name);
             newUser.setMssv(mssv);

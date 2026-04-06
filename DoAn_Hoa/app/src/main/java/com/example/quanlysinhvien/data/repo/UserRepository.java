@@ -32,6 +32,16 @@ public class UserRepository {
         return rows > 0;
     }
 
+    public boolean resetFaceTemplate(long userId) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.putNull("face_template");
+        int rows = db.update("users", cv, "id = ?", new String[] { String.valueOf(userId) });
+        if (rows > 0)
+            auditRepo.log("FACE_TEMPLATE_RESET", null, String.valueOf(userId), "face template reset");
+        return rows > 0;
+    }
+
     public List<User> getAllStudents(String filter) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         List<User> list = new ArrayList<>();

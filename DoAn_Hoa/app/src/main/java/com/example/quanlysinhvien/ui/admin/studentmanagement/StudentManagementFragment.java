@@ -2,11 +2,13 @@ package com.example.quanlysinhvien.ui.admin.studentmanagement;
 
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -50,7 +52,7 @@ public class StudentManagementFragment extends Fragment {
         int spanCount = getResources().getInteger(R.integer.student_grid_span_count);
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), spanCount));
 
-        adapter = new StudentManagementAdapter(this::onEditStudent, this::onDeleteStudent);
+        adapter = new StudentManagementAdapter(this::onEditStudent, this::onDeleteStudent, this::onResetFaceStudent);
         recyclerView.setAdapter(adapter);
 
         loadStudents("");
@@ -80,6 +82,10 @@ public class StudentManagementFragment extends Fragment {
         adapter.submitList(students);
     }
 
+    private void reloadCurrentFilter() {
+        loadStudents(etSearch.getText() == null ? "" : etSearch.getText().toString());
+    }
+
     private void onEditStudent(User student) {
         Bundle bundle = new Bundle();
         bundle.putLong("student_id", student.getId());
@@ -97,10 +103,38 @@ public class StudentManagementFragment extends Fragment {
         dialog.setOnResultListener(confirmed -> {
             if (confirmed) {
                 userRepository.deleteUser(student.getId());
-                loadStudents(etSearch.getText().toString()); // Reload the list
+                reloadCurrentFilter();
             }
         });
 
         dialog.show(getParentFragmentManager(), "DeleteStudentConfirmation");
+    }
+
+    private void onResetFaceStudent(User student) {
+        if (TextUtils.isEmpty(student.getFaceTemplate())) {
+            Toast.makeText(getContext(), "Sinh viên chưa có dữ liệu khuôn mặt", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        ConfirmationDialogFragment dialog = ConfirmationDialogFragment.newInstance(
+                "Reset khuôn mặt",
+                "Xóa dữ liệu khuôn mặt của " + student.getName()
+                        + "? Sau khi reset, sinh viên sẽ không thể điểm danh khuôn mặt cho đến khi admin cấp lại.",
+                R.drawable.ic_baseline_refresh_24,
+                "Reset",
+                "Hủy");
+
+        dialog.setOnResultListener(confirmed -> {
+            if (confirmed) {
+                if (userRepository.resetFaceTemplate(student.getId())) {
+                    Toast.makeText(getContext(), "Reset khuôn mặt thành công", Toast.LENGTH_SHORT).show();
+                    reloadCurrentFilter();
+                } else {
+                    Toast.makeText(getContext(), "Reset khuôn mặt thất bại", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        dialog.show(getParentFragmentManager(), "ResetFaceConfirmation");
     }
 }

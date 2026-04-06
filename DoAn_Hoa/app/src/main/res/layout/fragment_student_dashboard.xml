@@ -14,12 +14,11 @@
         android:orientation="vertical"
         android:padding="@dimen/padding_standard">
 
-        <!-- Welcome Section -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
             android:layout_marginBottom="@dimen/margin_large"
+            android:gravity="center_vertical"
             android:orientation="horizontal">
 
             <ImageView
@@ -47,20 +46,19 @@
                     android:id="@+id/tv_student_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tools:text="Nguyen Van A"
                     android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    tools:text="Nguyễn Văn A" />
 
                 <TextView
                     android:id="@+id/tv_student_id"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tools:text="2018123456"
-                    android:textAppearance="@style/TextAppearance.MaterialComponents.Caption" />
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+                    tools:text="2018123456" />
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Attendance Summary Card -->
         <com.google.android.material.card.MaterialCardView
             style="@style/CardStyle"
             android:layout_width="match_parent"
@@ -87,7 +85,6 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Quick Actions -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -99,13 +96,14 @@
                 style="@style/CardStyle.Action"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="@dimen/margin_small">
+                android:layout_marginEnd="@dimen/margin_small"
+                android:layout_weight="1">
 
                 <LinearLayout style="@style/ActionCardContent">
                     <ImageView
                         style="@style/ActionCardImage"
                         android:src="@drawable/ic_baseline_qr_code_scanner_24" />
+
                     <TextView
                         style="@style/ActionCardText"
                         android:text="Điểm danh" />
@@ -118,13 +116,14 @@
                 style="@style/CardStyle.Action"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="@dimen/margin_small">
+                android:layout_marginStart="@dimen/margin_small"
+                android:layout_weight="1">
 
                 <LinearLayout style="@style/ActionCardContent">
                     <ImageView
                         style="@style/ActionCardImage"
                         android:src="@drawable/ic_baseline_history_24" />
+
                     <TextView
                         style="@style/ActionCardText"
                         android:text="Lịch sử" />
@@ -133,34 +132,6 @@
             </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/card_face_enrollment"
-            style="@style/CardStyle.Action"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_medium">
-
-            <LinearLayout style="@style/ActionCardContent"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:padding="@dimen/padding_large">
-                <ImageView
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:src="@drawable/ic_student"
-                    app:tint="@color/primary" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/margin_medium"
-                    android:text="Đăng ký / Cập nhật khuôn mặt"
-                    android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
-                    android:textStyle="bold"
-                    android:textColor="@color/primary" />
-            </LinearLayout>
-
-        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

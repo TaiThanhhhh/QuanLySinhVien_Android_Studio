@@ -85,13 +85,13 @@ Khi sinh viên cần đổi thiết bị (do mất máy, hỏng hóc,...), quy t
 - **Tạo QR Code (Admin):**
     - `Admin` tạo mã QR cho mỗi buổi học. Mã này chứa thông tin buổi học và thời gian điểm danh được phép.
     - **Quy định thời gian:**
-        - **0–10 phút đầu:** Ghi nhận "Đúng giờ".
-        - **Sau 10 phút:** Ghi nhận "Đi muộn".
+        - **0–5 phút đầu:** Ghi nhận "Đúng giờ".
+        - **Sau 5 phút:** Ghi nhận "Đi muộn".
         - **Sau 45 phút:** Mã QR tự động hết hạn.
 - **Luồng Điểm Danh (Sinh viên):**
     1.  **Mở camera và quét mã QR.**
     2.  **Kiểm tra điều kiện:**
-        - **GPS:** Kiểm tra sinh viên có ở trong phạm vi lớp học (bán kính 50m) không. Nếu không, thông báo: *"Bạn đang ở ngoài phạm vi điểm danh."*
+        - **GPS:** Kiểm tra sinh viên có ở trong phạm vi lớp học (bán kính 15m) không. Nếu không, thông báo: *"Bạn đang ở ngoài phạm vi điểm danh."*
         - **Lớp học:** Kiểm tra mã sinh viên có trong danh sách lớp hay không. Nếu không, thông báo: *"Bạn không có trong danh sách lớp học này."*
         - **Điểm danh lại:** Kiểm tra sinh viên đã điểm danh hay chưa. Nếu rồi, thông báo: *"Bạn đã điểm danh lúc [giờ] - Trạng thái: [trạng thái]."*
     3.  **Xác minh khuôn mặt:**

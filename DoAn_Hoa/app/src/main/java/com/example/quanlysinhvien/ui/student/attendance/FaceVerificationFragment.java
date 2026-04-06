@@ -63,7 +63,7 @@ public class FaceVerificationFragment extends Fragment {
     private static final double EMBEDDING_COSINE_THRESHOLD = 0.75; // tuned for ArcFace-like models
     private static final String MODEL_ASSET = "mobile_face_embedding.tflite";
     private static final int MAX_RETRY_ATTEMPTS = 3;
-    private static final long LATE_THRESHOLD_MINUTES = 10;
+    private static final long LATE_THRESHOLD_MINUTES = 5;
 
     private long sessionId, startTime;
     private double latitude, longitude;
@@ -149,7 +149,8 @@ public class FaceVerificationFragment extends Fragment {
             enrolledFaceTemplate = student.getFaceTemplate();
             checkCameraPermission();
         } else {
-            Toast.makeText(getContext(), R.string.no_face_enrolled, Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(), "Bạn chưa có dữ liệu khuôn mặt. Vui lòng liên hệ admin để được cập nhật.",
+                    Toast.LENGTH_LONG).show();
             NavHostFragment.findNavController(this).popBackStack();
         }
     }

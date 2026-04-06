@@ -18,7 +18,6 @@ import com.example.quanlysinhvien.data.model.User;
 import com.example.quanlysinhvien.data.repo.AttendanceRepository;
 import com.example.quanlysinhvien.data.repo.UserRepository;
 import com.example.quanlysinhvien.databinding.FragmentStudentDashboardBinding;
-import com.example.quanlysinhvien.ui.base.ConfirmationDialogFragment;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
@@ -51,56 +50,31 @@ public class StudentDashboardFragment extends Fragment {
         loadUserProfile();
         loadAttendanceStats();
 
-        // Set up listeners for the cards
         binding.cardScanQr.setOnClickListener(
                 v -> NavHostFragment.findNavController(this).navigate(R.id.action_student_dashboard_to_scan_qr));
 
         binding.cardViewHistory.setOnClickListener(
                 v -> NavHostFragment.findNavController(this).navigate(R.id.action_student_dashboard_to_history));
-
-        binding.cardFaceEnrollment.setOnClickListener(v -> {
-            User user = userRepository.getUserById(sessionManager.getUserId());
-            if (user != null && user.getFaceTemplate() != null && !user.getFaceTemplate().isEmpty()) {
-                ConfirmationDialogFragment dialog = ConfirmationDialogFragment.newInstance(
-                        "Cập nhật khuôn mặt",
-                        "Bạn đã có dữ liệu khuôn mặt. Bạn có muốn chụp lại để cập nhật không?",
-                        R.drawable.ic_student, // Using student icon as requested/appropriate
-                        "Cập nhật",
-                        "Hủy");
-
-                dialog.setOnResultListener(confirmed -> {
-                    if (confirmed) {
-                        NavHostFragment.findNavController(this)
-                                .navigate(R.id.action_student_dashboard_to_face_enrollment);
-                    }
-                });
-
-                dialog.show(getParentFragmentManager(), "UpdateFaceConfirmation");
-            } else {
-                NavHostFragment.findNavController(this)
-                        .navigate(R.id.action_student_dashboard_to_face_enrollment);
-            }
-        });
     }
 
     private void loadUserProfile() {
         long userId = sessionManager.getUserId();
-        if (userId != -1) {
-            User user = userRepository.getUserById(userId);
-            if (user != null) {
-                binding.tvStudentName.setText(user.getName());
-                binding.tvStudentId.setText(user.getMssv());
+        if (userId == -1) {
+            return;
+        }
 
-                // Face enrollment card is now always visible as per user request
-                binding.cardFaceEnrollment.setVisibility(View.VISIBLE);
-            }
+        User user = userRepository.getUserById(userId);
+        if (user != null) {
+            binding.tvStudentName.setText(user.getName());
+            binding.tvStudentId.setText(user.getMssv());
         }
     }
 
     private void loadAttendanceStats() {
         long userId = sessionManager.getUserId();
-        if (userId == -1)
+        if (userId == -1) {
             return;
+        }
 
         List<StatusCount> stats = attendanceRepository.getStudentAttendanceStats(userId);
         if (stats.isEmpty()) {
@@ -116,24 +90,23 @@ public class StudentDashboardFragment extends Fragment {
             String label = stat.getStatus();
             int color = Color.GRAY;
 
-            // Translate status to Vietnamese and set colors
             switch (stat.getStatus()) {
                 case "PRESENT":
                 case "ON_TIME":
                     label = "Đúng giờ";
-                    color = Color.parseColor("#4CAF50"); // Green
+                    color = Color.parseColor("#4CAF50");
                     break;
                 case "LATE":
                     label = "Trễ";
-                    color = Color.parseColor("#FFC107"); // Amber
+                    color = Color.parseColor("#FFC107");
                     break;
                 case "ABSENT":
                     label = "Vắng";
-                    color = Color.parseColor("#F44336"); // Red
+                    color = Color.parseColor("#F44336");
                     break;
                 case "EXCUSED":
                     label = "Có phép";
-                    color = Color.parseColor("#2196F3"); // Blue
+                    color = Color.parseColor("#2196F3");
                     break;
             }
             entries.add(new PieEntry(stat.getCount(), label));

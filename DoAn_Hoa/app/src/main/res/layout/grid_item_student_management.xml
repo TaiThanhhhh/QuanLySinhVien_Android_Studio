@@ -59,6 +59,16 @@
                 app:tint="@color/primary" />
 
             <ImageButton
+                android:id="@+id/btn_reset_face"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="8dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Reset khuôn mặt"
+                android:src="@drawable/ic_baseline_refresh_24"
+                app:tint="@color/primary" />
+
+            <ImageButton
                 android:id="@+id/btn_delete_student"
                 android:layout_width="40dp"
                 android:layout_height="40dp"

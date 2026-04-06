@@ -20,7 +20,6 @@ import com.example.quanlysinhvien.auth.SessionManager;
 import com.example.quanlysinhvien.data.model.User;
 import com.example.quanlysinhvien.data.repo.UserRepository;
 import com.example.quanlysinhvien.databinding.FragmentChangePasswordBinding;
-
 import com.example.quanlysinhvien.util.ValidationUtils;
 
 import java.util.UUID;
@@ -103,7 +102,6 @@ public class ChangePasswordFragment extends Fragment {
             boolean success = userRepository.changePassword(userId, newPass);
             String newToken = null;
             if (success) {
-                // Invalidate old token by creating a new one
                 newToken = UUID.randomUUID().toString();
                 userRepository.updateAuthToken(userId, newToken);
             }
@@ -113,28 +111,35 @@ public class ChangePasswordFragment extends Fragment {
             handler.post(() -> {
                 showLoading(false);
                 if (success && user != null) {
-                    // Save new session and go to main
-                    if (getContext() == null)
+                    if (getContext() == null) {
                         return;
+                    }
+
                     SessionManager session = new SessionManager(requireContext());
                     session.saveSession(user.getId(), user.getRole(), finalToken);
 
                     if (getActivity() != null) {
-                        Toast.makeText(getContext(), "Đổi mật khẩu thành công! Vui lòng đăng ký khuôn mặt.",
-                                Toast.LENGTH_SHORT).show();
+                        boolean shouldEnrollFace = "STUDENT".equals(user.getRole())
+                                && (user.getFaceTemplate() == null || user.getFaceTemplate().isEmpty());
 
-                        // Navigate to Face Enrollment using fragment manager if navigation component
-                        // not available in this activity
-                        // or if using MainActivity with NavController
-                        Intent it = new Intent(getActivity(), MainActivity.class);
-                        it.putExtra("START_FACE_ENROLL", true);
-                        it.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(it);
+                        Intent intent = new Intent(getActivity(), MainActivity.class);
+                        if (shouldEnrollFace) {
+                            intent.putExtra("START_FACE_ENROLL", true);
+                            Toast.makeText(getContext(),
+                                    "Đổi mật khẩu thành công! Vui lòng đăng ký khuôn mặt lần đầu.",
+                                    Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getContext(), "Đổi mật khẩu thành công!", Toast.LENGTH_SHORT).show();
+                        }
+
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
                         getActivity().finish();
                     }
                 } else {
-                    if (getContext() == null)
+                    if (getContext() == null) {
                         return;
+                    }
                     Toast.makeText(getContext(), getString(R.string.error_change_password), Toast.LENGTH_SHORT).show();
                 }
             });
@@ -154,6 +159,6 @@ public class ChangePasswordFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        binding = null; // Avoid memory leaks
+        binding = null;
     }
 }

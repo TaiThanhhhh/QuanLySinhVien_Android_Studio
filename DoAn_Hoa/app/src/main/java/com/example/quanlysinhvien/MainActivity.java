@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
         navigationView.setNavigationItemSelectedListener(this::onNavigationItemSelected);
         updateNavHeader(navigationView);
 
-        if (getIntent().getBooleanExtra("START_FACE_ENROLL", false)) {
+        if ("STUDENT".equals(userRole) && getIntent().getBooleanExtra("START_FACE_ENROLL", false)) {
             navController.navigate(R.id.nav_face_enrollment);
         }
     }

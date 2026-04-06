@@ -31,6 +31,7 @@ import com.google.zxing.integration.android.IntentResult;
 import org.json.JSONObject;
 
 public class ScanQrFragment extends Fragment {
+    private static final float ATTENDANCE_RADIUS_METERS = 15f;
 
     private FusedLocationProviderClient fusedLocationClient;
     private EnrollmentRepository enrollmentRepository;
@@ -44,10 +45,10 @@ public class ScanQrFragment extends Fragment {
                 if (isGranted) {
                     verifyLocationAndProceed();
                 } else {
-                    Toast.makeText(getContext(), "Cần cấp quyền truy cập vị trí để điểm danh", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "Cần cấp quyền truy cập vị trí để điểm danh", Toast.LENGTH_LONG)
+                            .show();
                 }
-            }
-    );
+            });
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -60,7 +61,8 @@ public class ScanQrFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_scan_qr, container, false);
     }
 
@@ -82,7 +84,7 @@ public class ScanQrFragment extends Fragment {
                 Toast.makeText(getContext(), "Đã hủy quét", Toast.LENGTH_SHORT).show();
                 NavHostFragment.findNavController(this).popBackStack();
             } else {
-                this.qrContents = result.getContents();
+                qrContents = result.getContents();
                 checkPermissionAndVerifyLocation();
             }
         } else {
@@ -90,9 +92,9 @@ public class ScanQrFragment extends Fragment {
         }
     }
 
-
     private void checkPermissionAndVerifyLocation() {
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             verifyLocationAndProceed();
         } else {
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
@@ -100,48 +102,56 @@ public class ScanQrFragment extends Fragment {
     }
 
     private void verifyLocationAndProceed() {
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) return;
+        if (ContextCompat.checkSelfPermission(requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
 
         fusedLocationClient.getLastLocation().addOnSuccessListener(requireActivity(), location -> {
-            if (location != null) {
-                try {
-                    JSONObject json = new JSONObject(qrContents);
-                    long sessionId = json.getLong("sessionId");
-                    long classId = json.getLong("classId");
-                    long startTime = json.getLong("startTime");
-                    double classLat = json.getDouble("latitude");
-                    double classLon = json.getDouble("longitude");
-                    long userId = sessionManager.getUserId();
+            if (location == null) {
+                Toast.makeText(getContext(), "Không thể lấy được vị trí. Vui lòng bật GPS.", Toast.LENGTH_LONG)
+                        .show();
+                NavHostFragment.findNavController(this).popBackStack();
+                return;
+            }
 
-                    if (attendanceRepository.hasStudentAttended(sessionId, userId)) {
-                        Toast.makeText(getContext(), "Bạn đã điểm danh cho buổi học này rồi", Toast.LENGTH_LONG).show();
-                        NavHostFragment.findNavController(this).popBackStack();
-                        return;
-                    }
+            try {
+                JSONObject json = new JSONObject(qrContents);
+                long sessionId = json.getLong("sessionId");
+                long classId = json.getLong("classId");
+                long startTime = json.getLong("startTime");
+                double classLat = json.getDouble("latitude");
+                double classLon = json.getDouble("longitude");
+                long userId = sessionManager.getUserId();
 
-                    if (!enrollmentRepository.isStudentEnrolled(classId, userId)) {
-                        Toast.makeText(getContext(), "Bạn không có trong danh sách lớp học này", Toast.LENGTH_LONG).show();
-                        NavHostFragment.findNavController(this).popBackStack();
-                        return;
-                    }
+                if (attendanceRepository.hasStudentAttended(sessionId, userId)) {
+                    Toast.makeText(getContext(), "Bạn đã điểm danh cho buổi học này rồi", Toast.LENGTH_LONG).show();
+                    NavHostFragment.findNavController(this).popBackStack();
+                    return;
+                }
 
-                    float[] results = new float[1];
-                    Location.distanceBetween(classLat, classLon, location.getLatitude(), location.getLongitude(), results);
-                    float distanceInMeters = results[0];
+                if (!enrollmentRepository.isStudentEnrolled(classId, userId)) {
+                    Toast.makeText(getContext(), "Bạn không có trong danh sách lớp học này", Toast.LENGTH_LONG)
+                            .show();
+                    NavHostFragment.findNavController(this).popBackStack();
+                    return;
+                }
 
-                    if (distanceInMeters <= 50) {
-                        showConfirmationDialog(sessionId, startTime, location.getLatitude(), location.getLongitude());
-                    } else {
-                        Toast.makeText(getContext(), "Bạn đang ở ngoài phạm vi điểm danh. Vui lòng tiến lại gần hơn.", Toast.LENGTH_LONG).show();
-                        NavHostFragment.findNavController(this).popBackStack();
-                    }
+                float[] results = new float[1];
+                Location.distanceBetween(classLat, classLon, location.getLatitude(), location.getLongitude(),
+                        results);
+                float distanceInMeters = results[0];
 
-                } catch (Exception e) {
-                    Toast.makeText(getContext(), "Mã QR không hợp lệ", Toast.LENGTH_SHORT).show();
+                if (distanceInMeters <= ATTENDANCE_RADIUS_METERS) {
+                    showConfirmationDialog(sessionId, startTime, location.getLatitude(), location.getLongitude());
+                } else {
+                    Toast.makeText(getContext(),
+                            "Bạn đang ở ngoài phạm vi điểm danh 15m. Vui lòng tiến lại gần hơn.",
+                            Toast.LENGTH_LONG).show();
                     NavHostFragment.findNavController(this).popBackStack();
                 }
-            } else {
-                Toast.makeText(getContext(), "Không thể lấy được vị trí. Vui lòng bật GPS.", Toast.LENGTH_LONG).show();
+            } catch (Exception e) {
+                Toast.makeText(getContext(), "Mã QR không hợp lệ", Toast.LENGTH_SHORT).show();
                 NavHostFragment.findNavController(this).popBackStack();
             }
         });
@@ -149,7 +159,7 @@ public class ScanQrFragment extends Fragment {
 
     private void showConfirmationDialog(long sessionId, long startTime, double lat, double lon) {
         new AlertDialog.Builder(requireContext())
-                .setTitle("Xác nhận Điểm danh")
+                .setTitle("Xác nhận điểm danh")
                 .setMessage("Bạn có chắc chắn muốn điểm danh cho buổi học này không?")
                 .setPositiveButton("Có", (dialog, which) -> {
                     Bundle bundle = new Bundle();
