@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -55,6 +56,8 @@ public class StudentDashboardFragment extends Fragment {
 
         binding.cardViewHistory.setOnClickListener(
                 v -> NavHostFragment.findNavController(this).navigate(R.id.action_student_dashboard_to_history));
+
+        checkFaceEnrollment();
     }
 
     private void loadUserProfile() {
@@ -67,6 +70,21 @@ public class StudentDashboardFragment extends Fragment {
         if (user != null) {
             binding.tvStudentName.setText(user.getName());
             binding.tvStudentId.setText(user.getMssv());
+        }
+    }
+
+    private void checkFaceEnrollment() {
+        long userId = sessionManager.getUserId();
+        if (userId == -1)
+            return;
+
+        User user = userRepository.getUserById(userId);
+        if (user != null && (user.getFaceTemplate() == null || user.getFaceTemplate().isEmpty())) {
+            Toast.makeText(getContext(),
+                    "Vui lòng đăng ký khuôn mặt để sử dụng tính năng điểm danh.",
+                    Toast.LENGTH_LONG).show();
+            NavHostFragment.findNavController(this)
+                    .navigate(R.id.action_student_dashboard_to_face_enrollment);
         }
     }
 
